@@ -1,0 +1,2 @@
+Add-Migration Init
+Update-Database

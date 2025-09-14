@@ -1,0 +1,60 @@
+﻿@functions {
+    bool IsActive(string pathStartsWith)
+    {
+        var p = Context.Request.Path.Value?.ToLower() ?? "";
+        return p.StartsWith(pathStartsWith.ToLower());
+    }
+}
+<nav class="sidebar-menu p-3">
+    <a class="d-flex align-items-center mb-4 text-decoration-none text-white-50 sidebar-brand" asp-page="/Index">
+        <i class="bi bi-lightning-charge-fill me-2 text-warning"></i>
+        <span class="fw-semibold text-white">PosLite</span>
+    </a>
+
+    <ul class="nav nav-pills flex-column gap-1">
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/index")?"active":"")" asp-page="/Index">
+                <i class="bi bi-speedometer2"></i> <span>Tổng quan</span>
+            </a>
+        </li>
+
+        <li class="text-uppercase small text-white-50 mt-3 mb-1 px-2">Quản lý</li>
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/products")?"active":"")" asp-page="/Products/Index">
+                <i class="bi bi-box-seam"></i> <span>Sản phẩm</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/categories")?"active":"")" asp-page="/Categories/Index">
+                <i class="bi bi-tags"></i> <span>Danh mục</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/customers")?"active":"")" asp-page="/Customers/Index">
+                <i class="bi bi-people"></i> <span>Khách hàng</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/invoices")?"active":"")" asp-page="/Invoices/Index">
+                <i class="bi bi-receipt"></i> <span>Hóa đơn</span>
+            </a>
+        </li>
+        <li class="nav-item ps-4">
+            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/invoices/create")?"active":"")" asp-page="/Invoices/Create">
+                <i class="bi bi-plus-square"></i> <span>Lập hóa đơn</span>
+            </a>
+        </li>
+
+        <li class="text-uppercase small text-white-50 mt-3 mb-1 px-2">Hệ thống</li>
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/users")?"active":"")" asp-page="/Users/Index">
+                <i class="bi bi-person-gear"></i> <span>Người dùng</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/settings")?"active":"")" asp-page="/Settings/Index">
+                <i class="bi bi-gear"></i> <span>Cấu hình shop</span>
+            </a>
+        </li>
+    </ul>
+</nav>

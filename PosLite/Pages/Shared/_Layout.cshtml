@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PosLite</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <nav class="navbar navbar-light bg-body-tertiary border-bottom sticky-top">
+        <div class="container-fluid">
+            <button class="btn btn-outline-secondary d-lg-none" type="button"
+                    data-bs-toggle="offcanvas" data-bs-target="#appSidebar">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <span class="small text-secondary d-none d-sm-inline">@User.Identity?.Name</span>
+                <form method="post" asp-page="/Account/Logout" asp-antiforgery="true">
+                    <button class="btn btn-sm btn-outline-secondary" type="submit">
+                        <i class="bi bi-box-arrow-right me-1"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <aside class="sidebar d-none d-lg-block">
+        @await Html.PartialAsync("_Sidebar")
+    </aside>
+
+    <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="appSidebar">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Menu</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            @await Html.PartialAsync("_Sidebar")
+        </div>
+    </div>
+
+    <main class="app-content">
+        <div class="container-fluid py-3">
+            @RenderBody()
+        </div>
+    </main>
+
+    <div id="toast-data"
+         data-type="@TempData["Toast.Type"]"
+         data-text="@TempData["Toast.Text"]"></div>
+
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script>
+        const notyf = new Notyf({ duration: 2600, dismissible: true, position: { x: 'right', y: 'top' }});
+        window.appToast = {
+          ok:  (t)=> notyf.success(t || 'Thành công'),
+          err: (t)=> notyf.error(t || 'Có lỗi xảy ra')
+        };
+
+        (function () {
+          const el = document.getElementById('toast-data');
+          if (!el) return;
+          const type = el.dataset.type, text = el.dataset.text;
+          if (text) (type === 'success' ? notyf.success(text) : notyf.error(text));
+        })();
+    </script>
+
+    @RenderSection("Scripts", required: false)
+
+    <div id="appLoading" class="app-loading" aria-hidden="true" role="status">
+        <div class="loader"></div>
+    </div>
+</body>
+</html>
+<script>
+    const loadingEl = document.getElementById('appLoading');
+    const showLoading = ()=> loadingEl?.classList.add('show');
+    const hideLoading = ()=> loadingEl?.classList.remove('show');
+
+    document.addEventListener('submit', (e) => {
+      const form = e.target;
+      if (form.matches('form') && !form.hasAttribute('data-no-loading')) {
+        showLoading();
+      }
+    }, true);
+
+    window.addEventListener('pageshow', hideLoading);
+
+    if (window.htmx) {
+      document.body.addEventListener('htmx:beforeRequest',  showLoading);
+      document.body.addEventListener('htmx:afterSwap',      hideLoading);
+      document.body.addEventListener('htmx:responseError',  hideLoading);
+      document.body.addEventListener('htmx:sendError',      hideLoading);
+      document.body.addEventListener('htmx:timeout',        hideLoading);
+    }
+
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a[data-loading]');
+      if (a) showLoading();
+    }, true);
+</script>
+
