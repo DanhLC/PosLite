@@ -35,6 +35,7 @@ builder.Services.AddRazorPages().AddRazorPagesOptions(opt =>
 {
     opt.Conventions.AllowAnonymousToPage("/Account/Login");
     opt.Conventions.AllowAnonymousToPage("/Status/404");
+    opt.Conventions.AllowAnonymousToPage("/Status/500");
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
@@ -44,9 +45,9 @@ var app = builder.Build();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
+app.UseExceptionHandler("/500");
 app.UseStatusCodePagesWithReExecute("/404");
 app.UseAuthorization();
-
 app.MapRazorPages().RequireAuthorization();
 
 // Tạo DB + bật WAL + seed Admin

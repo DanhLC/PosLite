@@ -1,0 +1,106 @@
+﻿@page "/500"
+@model PosLite.Pages.Status.InternalErrorModel
+@{
+    Layout = null;          
+    Response.StatusCode = 500;  
+}
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>500 - Lỗi hệ thống</title>
+
+    <style>
+        :root {
+            --bg: #0f172a;
+            --txt: #e2e8f0;
+            --accent: #38bdf8
+        }
+
+        html, body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--txt);
+            font-family: system-ui,Segoe UI,Roboto,Helvetica,Arial
+        }
+
+        .wrap {
+            min-height: 100%;
+            display: grid;
+            place-items: center;
+            padding: 32px
+        }
+
+        .card {
+            max-width: 760px;
+            width: 100%;
+            display: grid;
+            gap: 20px;
+            text-align: center
+        }
+
+        .big {
+            font-size: 110px;
+            line-height: 1;
+            margin: 0;
+            color: var(--accent);
+            font-weight: 800;
+            letter-spacing: 2px
+        }
+
+        .title {
+            font-size: 28px;
+            margin: 0
+        }
+
+        .desc {
+            opacity: .8;
+            margin: 0
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 12px
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: #0b1220;
+            color: #e2e8f0;
+            text-decoration: none
+        }
+
+            .btn:hover {
+                border-color: var(--accent)
+            }
+
+        .muted {
+            opacity: .6
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="card">
+            <div class="big">500</div>
+            <h1 class="title">Đã có lỗi xảy ra ở phía máy chủ</h1>
+            <p class="desc">Xin lỗi! Có sự cố bất ngờ. Hãy thử tải lại trang hoặc quay về trang chủ.</p>
+            <div class="actions">
+                <a class="btn" href="/">Về trang chủ</a>
+                <a class="btn" href="javascript:location.reload()">Tải lại</a>
+            </div>
+            <p class="muted">Mã lỗi: 500 – Internal Server Error</p>
+        </div>
+    </div>
+</body>
+</html>
