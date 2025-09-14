@@ -17,7 +17,7 @@ public abstract class BaseEntity
 
 public class AppUser : IdentityUser { }
 
-// ====== Domain ======
+
 public class Customer : BaseEntity
 {
     public Guid CustomerId { get; set; }
@@ -31,7 +31,7 @@ public class Category : BaseEntity
 {
     public Guid CategoryId { get; set; }
     public string Name { get; set; } = default!;
-    public string NameSearch { get; set; } = ""; 
+    public string NameSearch { get; set; } = "";
 }
 
 public class Product : BaseEntity
@@ -41,7 +41,9 @@ public class Product : BaseEntity
     public string Name { get; set; } = default!;
     public string Unit { get; set; } = "";
     public Guid? CategoryId { get; set; }
-    public int Price { get; set; }
+    public decimal Price { get; set; }
+    public string NameSearch { get; set; } = "";
+    public string CodeSearch { get; set; } = "";
 }
 
 public class CustomerProductDiscount : BaseEntity
@@ -49,7 +51,7 @@ public class CustomerProductDiscount : BaseEntity
     public Guid Id { get; set; }
     public Guid CustomerId { get; set; }
     public Guid ProductId { get; set; }
-    public double Percent { get; set; } 
+    public double Percent { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
 }
@@ -74,14 +76,18 @@ public class SaleInvoiceLine
     public Guid LineId { get; set; }
     public Guid InvoiceId { get; set; }
     public Guid ProductId { get; set; }
+    public Product? Product { get; set; }
 
-    public double Qty { get; set; }
-    public int UnitPrice { get; set; }
+    public string ProductCode { get; set; } = default!;
+    public string ProductName { get; set; } = default!;
+    public string Unit { get; set; } = "";
 
+    public decimal UnitPrice { get; set; }
     public double DiscountPercent { get; set; }
-    public int DiscountAmount { get; set; }
-    public int LineTotal { get; set; }
+    public decimal DiscountAmount { get; set; }
+    public decimal LineTotal { get; set; }
 }
+
 
 public class CustomerLedger
 {
@@ -92,14 +98,14 @@ public class CustomerLedger
     public string RefType { get; set; } = default!;
     public string? RefId { get; set; }
 
-    public int Debit { get; set; } 
+    public int Debit { get; set; }
     public int Credit { get; set; }
     public int BalanceAfter { get; set; }
 }
 
 public class ShopSetting
 {
-    public string Key { get; set; } = default!; 
+    public string Key { get; set; } = default!;
     public string? Value { get; set; }
 }
 
@@ -159,6 +165,11 @@ public class AppDb : IdentityDbContext<AppUser>
 
         b.Entity<SaleInvoiceLine>().HasKey(x => x.LineId);
         b.Entity<SaleInvoiceLine>().HasIndex(x => x.InvoiceId);
+        b.Entity<SaleInvoiceLine>()
+            .HasOne(l => l.Product)
+            .WithMany()
+            .HasForeignKey(l => l.ProductId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         b.Entity<CustomerLedger>().HasKey(x => x.EntryId);
         b.Entity<CustomerLedger>().HasIndex(x => new { x.CustomerId, x.Date });
@@ -167,7 +178,15 @@ public class AppDb : IdentityDbContext<AppUser>
 
         b.Entity<Customer>();
         b.Entity<Category>().HasIndex(x => x.NameSearch);
-        b.Entity<Product>();
+
+        b.Entity<Product>().HasKey(x => x.ProductId);
+        b.Entity<Product>().HasIndex(x => x.NameSearch);
+        b.Entity<Product>().HasIndex(x => x.CodeSearch);
+        b.Entity<Product>().HasIndex(x => x.Code).IsUnique();
+        b.Entity<Product>().HasIndex(x => x.CategoryId);
+        b.Entity<Product>().HasIndex(x => x.NameSearch);
+        b.Entity<Product>().HasIndex(x => x.CodeSearch);
+        b.Entity<Product>().Property(p => p.Price).HasColumnType("NUMERIC");
         b.Entity<CustomerProductDiscount>();
     }
 
@@ -191,22 +210,57 @@ public class AppDb : IdentityDbContext<AppUser>
 
                     if (e.Entity is Category cAdd)
                         cAdd.NameSearch = TextSearch.Normalize(cAdd.Name);
+
+                    if (e.Entity is Product pAdd)
+                    {
+                        pAdd.NameSearch = TextSearch.Normalize(pAdd.Name);
+                        pAdd.CodeSearch = TextSearch.Normalize(pAdd.Code);
+                    }
                     break;
 
                 case EntityState.Modified:
                     e.Property(x => x.CreatedAt).IsModified = false;
                     e.Property(x => x.CreatedBy).IsModified = false;
-                    e.Entity.UpdatedAt = now;
-                    e.Entity.UpdatedBy = user;
 
-                    if (e.Entity is Category cUpd &&
-                        e.Property(nameof(Category.Name)).IsModified)
+                    // Không audit nếu chỉ đổi các field kỹ thuật search
+                    bool needAudit = true;
+                    if (e.Entity is Category)
                     {
+                        var names = e.Properties.Where(p => p.IsModified).Select(p => p.Metadata.Name).ToHashSet();
+                        names.RemoveWhere(n => n is nameof(BaseEntity.CreatedAt) or nameof(BaseEntity.CreatedBy)
+                                                 or nameof(BaseEntity.UpdatedAt) or nameof(BaseEntity.UpdatedBy));
+                        if (names.Count == 1 && names.Contains(nameof(Category.NameSearch))) needAudit = false;
+                    }
+
+                    if (e.Entity is Product)
+                    {
+                        var names = e.Properties.Where(p => p.IsModified).Select(p => p.Metadata.Name).ToHashSet();
+                        names.RemoveWhere(n => n is nameof(BaseEntity.CreatedAt) or nameof(BaseEntity.CreatedBy)
+                                                 or nameof(BaseEntity.UpdatedAt) or nameof(BaseEntity.UpdatedBy));
+                        if (names.All(n => n is nameof(Product.NameSearch) or nameof(Product.CodeSearch)))
+                            needAudit = false;
+                    }
+
+                    if (needAudit)
+                    {
+                        e.Entity.UpdatedAt = now;
+                        e.Entity.UpdatedBy = user;
+                    }
+
+                    if (e.Entity is Category cUpd && e.Property(nameof(Category.Name)).IsModified)
                         cUpd.NameSearch = TextSearch.Normalize(cUpd.Name);
+
+                    if (e.Entity is Product pUpd)
+                    {
+                        if (e.Property(nameof(Product.Name)).IsModified)
+                            pUpd.NameSearch = TextSearch.Normalize(pUpd.Name);
+                        if (e.Property(nameof(Product.Code)).IsModified)
+                            pUpd.CodeSearch = TextSearch.Normalize(pUpd.Code);
                     }
                     break;
             }
         }
         return base.SaveChangesAsync(cancellationToken);
     }
+
 }

@@ -88,7 +88,7 @@ public class IndexModel : PageModel
         await _db.SaveChangesAsync();
 
         TempData["Toast.Type"] = "success";
-        TempData["Toast.Text"] = "Đã chuyển danh mục sang trạng thái ngừng dùng.";
+        TempData["Toast.Text"] = "Đã chuyển danh mục sang trạng thái ngừng sử dụng.";
         return RedirectToPage("./Index", new { q, status, pageIndex, pageSize });
     }
 

@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using PosLite.Common;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,4 +72,13 @@ using (var scope = app.Services.CreateScope())
         await db.SaveChangesAsync();
 }
 
+var vi = new CultureInfo("vi-VN");
+var locOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(vi),
+    SupportedCultures = new[] { vi },
+    SupportedUICultures = new[] { vi }
+};
+
+app.UseRequestLocalization(locOptions);
 app.Run();

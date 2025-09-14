@@ -1,0 +1,117 @@
+﻿@page
+@model PosLite.Pages.Products.FormModalModel
+@using System.Globalization
+@{
+    Layout = null;
+    var isEdit = Model.Id.HasValue;
+    var vi = CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<div class="modal-header">
+    <h5 class="modal-title">@((isEdit ? "Sửa" : "Thêm") + " sản phẩm")</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <form hx-post="/Products/FormModal@(Model.Id.HasValue ? $"?id={Model.Id}" : "")"
+          hx-target="#prodModalContent" hx-swap="innerHTML" asp-antiforgery="true">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+        <div class="mb-3">
+            <label class="form-label">Mã</label>
+            <input asp-for="M.Code" class="form-control" />
+            <span class="text-danger" asp-validation-for="M.Code"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Tên</label>
+            <input asp-for="M.Name" class="form-control" />
+            <span class="text-danger" asp-validation-for="M.Name"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Đơn vị tính</label>
+            <input asp-for="M.Unit" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Danh mục</label>
+            <select asp-for="M.CategoryId" class="form-select">
+                <option value="">-- Chọn --</option>
+                @foreach (var c in Model.Categories)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Giá</label>
+            <input id="PriceDisplay"
+                   class="form-control text-end"
+                   inputmode="decimal" autocomplete="off"
+                   value="@(Model.M?.Price > 0
+                        ? string.Format(vi, "{0:N3}", Model.M.Price).TrimEnd('0').TrimEnd(',')
+                        : "")" />
+
+            <input asp-for="M.Price" type="hidden" />
+            <span class="text-danger" asp-validation-for="M.Price"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label d-block">Trạng thái</label>
+            <div class="form-check form-switch">
+                <input class="form-check-input" asp-for="M.IsActive" />
+                <label class="form-check-label" asp-for="M.IsActive">Sử dụng</label>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button class="btn btn-primary" type="submit">Lưu</button>
+        </div>
+    </form>
+</div>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <script> window.appToast?.err('Vui lòng kiểm tra lại các trường.'); </script>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<script>
+    (function () {
+      const display = document.getElementById('PriceDisplay');
+      const hidden  = document.getElementById('M_Price');
+
+      function formatVi(s) {
+        if (!s) return "";
+        s = s.replace(/\./g, '').replace(/[^\d,]/g, '');
+        const parts = s.split(',');
+        let intPart = parts[0] || '';
+        let frac    = parts[1] || '';
+        frac = frac.substring(0, 3);
+        intPart = intPart.replace(/^0+(?=\d)/, '');
+        if (intPart === '') intPart = '0';
+        intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return frac.length ? `${intPart},${frac}` : intPart;
+      }
+
+      function syncHiddenFromDisplay() {
+        const formatted = formatVi(display.value);
+        display.value = formatted;
+        hidden.value = formatted.replace(/\./g, '');
+      }
+
+      display.addEventListener('input', () => {
+        const v = display.value.replace(/[^\d,]/g, '');
+        hidden.value = v; 
+      });
+      display.addEventListener('blur', syncHiddenFromDisplay);
+      syncHiddenFromDisplay();
+    })();
+</script>

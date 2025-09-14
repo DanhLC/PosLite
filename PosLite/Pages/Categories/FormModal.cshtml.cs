@@ -19,18 +19,30 @@ public class FormModalModel : PageModel
     public string Name { get; set; } = "";
     [BindProperty] public bool IsActive { get; set; } = true;
 
+    /// <summary>
+    /// Load data for edit
+    /// </summary>
+    /// <returns></returns>
     public async Task<IActionResult> OnGetAsync()
     {
         if (IsEdit)
         {
             var cat = await _db.Categories.IgnoreQueryFilters()
                           .FirstOrDefaultAsync(x => x.CategoryId == Id);
+
             if (cat == null) return NotFound();
-            Name = cat.Name; IsActive = cat.IsActive;
+
+            Name = cat.Name;
+            IsActive = cat.IsActive;
         }
-        return Page(); // trả về markup modal
+
+        return Page();
     }
 
+    /// <summary>
+    /// Save (create or update)
+    /// </summary>
+    /// <returns></returns>
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid) return Page();
@@ -89,5 +101,4 @@ public class FormModalModel : PageModel
             return Content(js, "text/html");
         }
     }
-
 }
