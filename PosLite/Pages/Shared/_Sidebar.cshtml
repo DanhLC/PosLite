@@ -1,12 +1,10 @@
 ﻿@* _Sidebar.cshtml *@
 @functions {
-    // Razor Page hiện tại, vd: /Products/Index
     string CurrentPage => (string?)ViewContext.RouteData.Values["page"] ?? "";
 
     bool PageStartsWith(string prefix)
         => CurrentPage.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
 
-    // Nhóm “Danh sách sản phẩm”
     bool InCatalog() =>
         PageStartsWith("/Products") ||
         PageStartsWith("/Categories") ||
@@ -20,7 +18,6 @@
     </a>
 
     <ul class="nav flex-column gap-1">
-        <!-- KHÔNG dùng nav-pills -->
         <li class="nav-item">
             <a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Index") ? " active" : "")"
                asp-page="/Index">
@@ -30,7 +27,6 @@
 
         <li class="text-uppercase small text-muted mt-3 mb-1 px-2">Quản lý</li>
 
-        <!-- Group: Danh sách sản phẩm -->
         <li class="nav-item">
             <button type="button"
                     class="nav-link btn-toggle d-flex align-items-center gap-2 w-100@(InCatalog() ? "" : " collapsed")"

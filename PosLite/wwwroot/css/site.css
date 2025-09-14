@@ -72,13 +72,11 @@ body {
         color: #fff;
     }
 
-    /* Sub items (giống Volt: lùi vào và hơi đậm) */
     .sidebar-menu .nav-link.sub {
         padding-left: 2.25rem;
         font-weight: 500;
     }
 
-        /* Chỉ sub-item active mới có nền & chữ trắng (như Volt) */
         .sidebar-menu .nav-link.sub.active {
             background: var(--sb-active-bg);
             color: #fff !important;
@@ -88,12 +86,10 @@ body {
                 color: #fff !important;
             }
 
-/* Nhãn nhóm */
 .sidebar-menu .text-muted {
     color: var(--sb-fg-muted) !important;
 }
 
-/* Chevron xoay khi mở */
 .sidebar-menu .chev {
     transition: transform .2s ease;
 }
@@ -102,7 +98,6 @@ body {
         transform: rotate(180deg);
     }
 
-/* Tắt style mặc định của .active từ Bootstrap (nếu có) */
 .nav .nav-link.active {
     color: inherit;
     background: transparent;
