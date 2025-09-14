@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,7 @@ builder.Services.ConfigureApplicationCookie(o =>
 builder.Services.AddRazorPages().AddRazorPagesOptions(opt =>
 {
     opt.Conventions.AllowAnonymousToPage("/Account/Login");
+    opt.Conventions.AllowAnonymousToPage("/Status/404");
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
@@ -42,9 +44,9 @@ var app = builder.Build();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
+app.UseStatusCodePagesWithReExecute("/404");
 app.UseAuthorization();
 
-// Yêu cầu đăng nhập cho toàn bộ site trừ các trang AllowAnonymous ở trên
 app.MapRazorPages().RequireAuthorization();
 
 // Tạo DB + bật WAL + seed Admin
@@ -55,6 +57,5 @@ using (var scope = app.Services.CreateScope())
     db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
     await Seed.CreateRolesAndAdmin(scope.ServiceProvider);
 }
-
 
 app.Run();
