@@ -1,60 +1,98 @@
-﻿@functions {
-    bool IsActive(string pathStartsWith)
-    {
-        var p = Context.Request.Path.Value?.ToLower() ?? "";
-        return p.StartsWith(pathStartsWith.ToLower());
-    }
+﻿@* _Sidebar.cshtml *@
+@functions {
+    // Razor Page hiện tại, vd: /Products/Index
+    string CurrentPage => (string?)ViewContext.RouteData.Values["page"] ?? "";
+
+    bool PageStartsWith(string prefix)
+        => CurrentPage.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+
+    // Nhóm “Danh sách sản phẩm”
+    bool InCatalog() =>
+        PageStartsWith("/Products") ||
+        PageStartsWith("/Categories") ||
+        PageStartsWith("/Discounts");
 }
+
 <nav class="sidebar-menu p-3">
-    <a class="d-flex align-items-center mb-4 text-decoration-none text-white-50 sidebar-brand" asp-page="/Index">
+    <a class="d-flex align-items-center mb-4 text-decoration-none sidebar-brand" asp-page="/Index">
         <i class="bi bi-lightning-charge-fill me-2 text-warning"></i>
-        <span class="fw-semibold text-white">PosLite</span>
+        <span class="fw-semibold">PosLite</span>
     </a>
 
-    <ul class="nav nav-pills flex-column gap-1">
+    <ul class="nav flex-column gap-1">
+        <!-- KHÔNG dùng nav-pills -->
         <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/index")?"active":"")" asp-page="/Index">
-                <i class="bi bi-speedometer2"></i> <span>Tổng quan</span>
+            <a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Index") ? " active" : "")"
+               asp-page="/Index">
+                <i class="bi bi-speedometer2"></i><span>Tổng quan</span>
             </a>
         </li>
 
-        <li class="text-uppercase small text-white-50 mt-3 mb-1 px-2">Quản lý</li>
+        <li class="text-uppercase small text-muted mt-3 mb-1 px-2">Quản lý</li>
+
+        <!-- Group: Danh sách sản phẩm -->
         <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/products")?"active":"")" asp-page="/Products/Index">
-                <i class="bi bi-box-seam"></i> <span>Sản phẩm</span>
-            </a>
+            <button type="button"
+                    class="nav-link btn-toggle d-flex align-items-center gap-2 w-100@(InCatalog() ? "" : " collapsed")"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#grpCatalog"
+                    aria-expanded="@(InCatalog().ToString().ToLower())"
+                    aria-controls="grpCatalog">
+                <i class="bi bi-box-seam"></i>
+                <span>Sản phẩm</span>
+                <i class="bi bi-chevron-down ms-auto chev@(InCatalog() ? " open" : "")"></i>
+            </button>
+
+            <div id="grpCatalog" class="collapse@(InCatalog() ? " show" : "")">
+                <a class="nav-link sub d-flex align-items-center gap-2@(PageStartsWith("/Products") ? " active" : "")"
+                   asp-page="/Products/Index">
+                    <i class="bi bi-box"></i><span>Danh sách sản phẩm</span>
+                </a>
+                <a class="nav-link sub d-flex align-items-center gap-2@(PageStartsWith("/Categories") ? " active" : "")"
+                   asp-page="/Categories/Index">
+                    <i class="bi bi-tags"></i><span>Danh mục</span>
+                </a>
+                <a class="nav-link sub d-flex align-items-center gap-2@(PageStartsWith("/Discounts") ? " active" : "")"
+                   asp-page="/Discounts/Index">
+                    <i class="bi bi-percent"></i><span>Giảm giá</span>
+                </a>
+            </div>
         </li>
+
         <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/categories")?"active":"")" asp-page="/Categories/Index">
-                <i class="bi bi-tags"></i> <span>Danh mục</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/customers")?"active":"")" asp-page="/Customers/Index">
-                <i class="bi bi-people"></i> <span>Khách hàng</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/invoices")?"active":"")" asp-page="/Invoices/Index">
-                <i class="bi bi-receipt"></i> <span>Hóa đơn</span>
-            </a>
-        </li>
-        <li class="nav-item ps-4">
-            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/invoices/create")?"active":"")" asp-page="/Invoices/Create">
-                <i class="bi bi-plus-square"></i> <span>Lập hóa đơn</span>
+            <a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Customers") ? " active" : "")"
+               asp-page="/Customers/Index">
+                <i class="bi bi-people"></i><span>Khách hàng</span>
             </a>
         </li>
 
-        <li class="text-uppercase small text-white-50 mt-3 mb-1 px-2">Hệ thống</li>
+        <li class="text-uppercase small text-muted mt-3 mb-1 px-2">Hệ thống</li>
+
         <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/users")?"active":"")" asp-page="/Users/Index">
-                <i class="bi bi-person-gear"></i> <span>Người dùng</span>
+            <a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Users") ? " active" : "")"
+               asp-page="/Users/Index">
+                <i class="bi bi-person-gear"></i><span>Người dùng</span>
             </a>
         </li>
+
         <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2 @(IsActive("/settings")?"active":"")" asp-page="/Settings/Index">
-                <i class="bi bi-gear"></i> <span>Cấu hình shop</span>
+            <a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Settings") ? " active" : "")"
+               asp-page="/Settings/Index">
+                <i class="bi bi-gear"></i><span>Cấu hình shop</span>
             </a>
         </li>
     </ul>
 </nav>
+
+<script>
+    document.querySelectorAll('.sidebar-menu [data-bs-toggle="collapse"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetSel = btn.getAttribute('data-bs-target');
+        const target = targetSel ? document.querySelector(targetSel) : null;
+        const icon = btn.querySelector('.chev');
+        setTimeout(() => {
+          icon?.classList.toggle('open', target?.classList.contains('show'));
+        }, 170);
+      });
+    });
+</script>

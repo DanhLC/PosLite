@@ -20,51 +20,92 @@ html {
 body {
   margin-bottom: 60px;
 }
-
 :root {
-    --sidebar-w: 240px;
+    --sb-bg: #0f172a; 
+    --sb-fg: #c7d1e0; 
+    --sb-fg-muted: #8aa0b4;
+    --sb-hover-bg: rgba(255,255,255,.06);
+    --sb-active-bg: rgba(255,255,255,.10); 
+    --sb-radius: .75rem;
 }
 
 .sidebar {
     position: fixed;
     left: 0;
-    width: var(--sidebar-w);
-    height: -webkit-fill-available;
-    background: #374151;
-    color: #adb5bd;
+    width: 10%;
+    height: 100dvh;
+    background: var(--sb-bg);
+    color: var(--sb-fg);
     overflow-y: auto;
     z-index: 1030;
 }
 
+.app-content {
+    margin-left: 0;
+}
+
+@media (min-width:992px) {
+    .app-content {
+        margin-left: 240px;
+    }
+}
+
+.sidebar-brand {
+    color: var(--sb-fg);
+}
+
 .sidebar-menu .nav-link {
-    color: #c7d1e0;
-    border-radius: .5rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    width: 100%;
+    padding: .65rem .8rem;
+    border-radius: var(--sb-radius);
+    color: var(--sb-fg);
+    text-decoration: none;
+    background: transparent;
+    border: 0;
 }
 
     .sidebar-menu .nav-link:hover {
-        background: #162036;
+        background: var(--sb-hover-bg);
         color: #fff;
     }
 
-    .sidebar-menu .nav-link.active {
-        background: #1f2a48;
-        color: #fff;
+    /* Sub items (giống Volt: lùi vào và hơi đậm) */
+    .sidebar-menu .nav-link.sub {
+        padding-left: 2.25rem;
+        font-weight: 500;
     }
 
-.sidebar-brand {
-    color: #c7d1e0;
+        /* Chỉ sub-item active mới có nền & chữ trắng (như Volt) */
+        .sidebar-menu .nav-link.sub.active {
+            background: var(--sb-active-bg);
+            color: #fff !important;
+        }
+
+            .sidebar-menu .nav-link.sub.active i {
+                color: #fff !important;
+            }
+
+/* Nhãn nhóm */
+.sidebar-menu .text-muted {
+    color: var(--sb-fg-muted) !important;
 }
 
-.app-content {
-    margin-left: 0;
-    padding-left: .5rem;
-    padding-right: .5rem;
+/* Chevron xoay khi mở */
+.sidebar-menu .chev {
+    transition: transform .2s ease;
 }
 
-@media (min-width: 992px) {
-    .app-content {
-        margin-left: var(--sidebar-w);
+    .sidebar-menu .chev.open {
+        transform: rotate(180deg);
     }
+
+/* Tắt style mặc định của .active từ Bootstrap (nếu có) */
+.nav .nav-link.active {
+    color: inherit;
+    background: transparent;
 }
 
 /* === SPINNER LOADING === */
