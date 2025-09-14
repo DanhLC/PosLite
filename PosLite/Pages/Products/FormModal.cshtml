@@ -19,13 +19,13 @@
         <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
 
         <div class="mb-3">
-            <label class="form-label">Mã</label>
+            <label class="form-label">Mã</label><label style="color:red">*</label>
             <input asp-for="M.Code" class="form-control" />
             <span class="text-danger" asp-validation-for="M.Code"></span>
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Tên</label>
+            <label class="form-label">Tên</label><label style="color:red">*</label>
             <input asp-for="M.Name" class="form-control" />
             <span class="text-danger" asp-validation-for="M.Name"></span>
         </div>
@@ -36,7 +36,7 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Danh mục</label>
+            <label class="form-label">Danh mục</label><label style="color:red">*</label>
             <select asp-for="M.CategoryId" class="form-select">
                 <option value="">-- Chọn --</option>
                 @foreach (var c in Model.Categories)
@@ -47,13 +47,13 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Giá</label>
+            <label class="form-label">Giá</label><label style="color:red">*</label>
             <input id="PriceDisplay"
                    class="form-control text-end"
                    inputmode="decimal" autocomplete="off"
                    value="@(Model.M?.Price > 0
                         ? string.Format(vi, "{0:N3}", Model.M.Price).TrimEnd('0').TrimEnd(',')
-                        : "")" />
+                        : "0")" />
 
             <input asp-for="M.Price" type="hidden" />
             <span class="text-danger" asp-validation-for="M.Price"></span>
@@ -113,5 +113,17 @@
       });
       display.addEventListener('blur', syncHiddenFromDisplay);
       syncHiddenFromDisplay();
+    })();
+
+    (function () {
+      const form = document.querySelector('form[hx-post]');
+      form?.addEventListener('submit', function (e) {
+        const cat = document.getElementById('M_CategoryId');
+        if (!cat.value) {
+          e.preventDefault(); e.stopPropagation();
+          window.appToast?.err('Vui lòng chọn danh mục.');
+          cat.focus();
+        }
+      });
     })();
 </script>

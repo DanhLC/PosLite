@@ -20,6 +20,7 @@ public class FormModalModel : PageModel
 
     public class InputModel
     {
+        [Required(ErrorMessage = "Vui lòng nhập mã sản phẩm")]
         public string Code { get; set; } = "";
 
         [Required(ErrorMessage = "Vui lòng nhập tên sản phẩm")]
@@ -84,6 +85,7 @@ public class FormModalModel : PageModel
 
         var exists = await _db.Products.IgnoreQueryFilters()
             .AnyAsync(x => x.Code == M.Code && x.ProductId != Id);
+
         if (exists)
         {
             ModelState.AddModelError("M.Code", "Mã sản phẩm đã tồn tại.");

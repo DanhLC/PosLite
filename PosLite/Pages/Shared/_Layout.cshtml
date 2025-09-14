@@ -9,6 +9,33 @@
     <link href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
+<script>
+    const loadingEl = document.getElementById('appLoading');
+    const showLoading = ()=> loadingEl?.classList.add('show');
+    const hideLoading = ()=> loadingEl?.classList.remove('show');
+
+    document.addEventListener('submit', (e) => {
+      const form = e.target;
+      if (form.matches('form') && !form.hasAttribute('data-no-loading')) {
+        showLoading();
+      }
+    }, true);
+
+    window.addEventListener('pageshow', hideLoading);
+
+    if (window.htmx) {
+      document.body.addEventListener('htmx:beforeRequest',  showLoading);
+      document.body.addEventListener('htmx:afterSwap',      hideLoading);
+      document.body.addEventListener('htmx:responseError',  hideLoading);
+      document.body.addEventListener('htmx:sendError',      hideLoading);
+      document.body.addEventListener('htmx:timeout',        hideLoading);
+    }
+
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a[data-loading]');
+      if (a) showLoading();
+    }, true);
+</script>
 <body>
     <nav class="navbar navbar-light bg-body-tertiary border-bottom sticky-top">
         <div class="container-fluid">
@@ -77,31 +104,5 @@
     </div>
 </body>
 </html>
-<script>
-    const loadingEl = document.getElementById('appLoading');
-    const showLoading = ()=> loadingEl?.classList.add('show');
-    const hideLoading = ()=> loadingEl?.classList.remove('show');
 
-    document.addEventListener('submit', (e) => {
-      const form = e.target;
-      if (form.matches('form') && !form.hasAttribute('data-no-loading')) {
-        showLoading();
-      }
-    }, true);
-
-    window.addEventListener('pageshow', hideLoading);
-
-    if (window.htmx) {
-      document.body.addEventListener('htmx:beforeRequest',  showLoading);
-      document.body.addEventListener('htmx:afterSwap',      hideLoading);
-      document.body.addEventListener('htmx:responseError',  hideLoading);
-      document.body.addEventListener('htmx:sendError',      hideLoading);
-      document.body.addEventListener('htmx:timeout',        hideLoading);
-    }
-
-    document.addEventListener('click', (e) => {
-      const a = e.target.closest('a[data-loading]');
-      if (a) showLoading();
-    }, true);
-</script>
 
