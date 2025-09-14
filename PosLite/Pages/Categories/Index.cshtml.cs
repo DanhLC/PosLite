@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using PosLite.Common;
 
 namespace PosLite.Pages.Categories;
 
@@ -43,9 +44,10 @@ public class IndexModel : PageModel
 
         if (!string.IsNullOrWhiteSpace(q))
         {
-            var kw = q.Trim().ToLower();
-            query = query.Where(x => x.Name.ToLower().Contains(kw));
+            var term = TextSearch.Normalize(q);
+            query = query.Where(x => x.NameSearch.Contains(term));
         }
+
         if (status == "active") query = query.Where(x => x.IsActive);
         else if (status == "inactive") query = query.Where(x => !x.IsActive);
 
@@ -158,8 +160,8 @@ public class IndexModel : PageModel
 
         if (!string.IsNullOrWhiteSpace(q))
         {
-            var kw = q.Trim().ToLower();
-            afterQuery = afterQuery.Where(x => x.Name.ToLower().Contains(kw));
+            var term = TextSearch.Normalize(q);
+            afterQuery = afterQuery.Where(x => x.NameSearch.Contains(term));
         }
 
         var totalAfter = await afterQuery.CountAsync();

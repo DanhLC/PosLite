@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+using PosLite.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +57,17 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
     db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
     await Seed.CreateRolesAndAdmin(scope.ServiceProvider);
+
+    var needFix = await db.Categories
+       .IgnoreQueryFilters()
+       .Where(c => string.IsNullOrEmpty(c.NameSearch))
+       .ToListAsync();
+
+    foreach (var c in needFix)
+        c.NameSearch = TextSearch.Normalize(c.Name);
+
+    if (needFix.Count > 0)
+        await db.SaveChangesAsync();
 }
 
 app.Run();

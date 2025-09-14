@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using PosLite.Common;
 
 // ====== Base & Identity ======
 public abstract class BaseEntity
@@ -34,6 +31,7 @@ public class Category : BaseEntity
 {
     public Guid CategoryId { get; set; }
     public string Name { get; set; } = default!;
+    public string NameSearch { get; set; } = ""; 
 }
 
 public class Product : BaseEntity
@@ -105,11 +103,18 @@ public class ShopSetting
     public string? Value { get; set; }
 }
 
-
+/// <summary>
+/// Application database context, inheriting from IdentityDbContext to include identity management.
+/// </summary>
 public class AppDb : IdentityDbContext<AppUser>
 {
     private readonly ICurrentUser _currentUser;
 
+    /// <summary>
+    /// Constructor for AppDb, accepting DbContextOptions and ICurrentUser for tracking the current user.
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="currentUser"></param>
     public AppDb(DbContextOptions<AppDb> options, ICurrentUser currentUser)
         : base(options)
     {
@@ -125,6 +130,10 @@ public class AppDb : IdentityDbContext<AppUser>
     public DbSet<CustomerLedger> CustomerLedgers => Set<CustomerLedger>();
     public DbSet<ShopSetting> ShopSettings => Set<ShopSetting>();
 
+    /// <summary>
+    /// Configure the entity models and their relationships.
+    /// </summary>
+    /// <param name="b"></param>
     protected override void OnModelCreating(ModelBuilder b)
     {
         base.OnModelCreating(b);
@@ -157,11 +166,16 @@ public class AppDb : IdentityDbContext<AppUser>
         b.Entity<ShopSetting>().HasKey(x => x.Key);
 
         b.Entity<Customer>();
-        b.Entity<Category>();
+        b.Entity<Category>().HasIndex(x => x.NameSearch);
         b.Entity<Product>();
         b.Entity<CustomerProductDiscount>();
     }
 
+    /// <summary>
+    /// Override SaveChangesAsync to automatically set CreatedAt, CreatedBy, UpdatedAt, and UpdatedBy fields.
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
@@ -172,24 +186,27 @@ public class AppDb : IdentityDbContext<AppUser>
             switch (e.State)
             {
                 case EntityState.Added:
-                    e.Entity.IsActive = e.Entity.IsActive; 
                     e.Entity.CreatedAt = now;
                     e.Entity.CreatedBy = user;
+
+                    if (e.Entity is Category cAdd)
+                        cAdd.NameSearch = TextSearch.Normalize(cAdd.Name);
                     break;
 
                 case EntityState.Modified:
                     e.Property(x => x.CreatedAt).IsModified = false;
                     e.Property(x => x.CreatedBy).IsModified = false;
-
                     e.Entity.UpdatedAt = now;
                     e.Entity.UpdatedBy = user;
-                    break;
 
-                case EntityState.Deleted:
+                    if (e.Entity is Category cUpd &&
+                        e.Property(nameof(Category.Name)).IsModified)
+                    {
+                        cUpd.NameSearch = TextSearch.Normalize(cUpd.Name);
+                    }
                     break;
             }
         }
-
         return base.SaveChangesAsync(cancellationToken);
     }
 }
