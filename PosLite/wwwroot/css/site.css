@@ -98,10 +98,16 @@ body {
         transform: rotate(180deg);
     }
 
-.nav .nav-link.active {
-    color: inherit;
-    background: transparent;
+/* Active cho item cha giống Volt */
+.sidebar-menu .nav-link.active:not(.sub) {
+    background: var(--sb-active-bg); /* rgba(255,255,255,.10) bạn đang dùng */
+    color: #fff !important;
 }
+
+    .sidebar-menu .nav-link.active:not(.sub) i {
+        color: #fff !important; /* icon cũng trắng */
+    }
+
 
 /* === SPINNER LOADING === */
 .loader {
