@@ -84,7 +84,7 @@ public class FormModalModel : PageModel
         }
 
         var exists = await _db.Products.IgnoreQueryFilters()
-            .AnyAsync(x => x.Code == M.Code && x.ProductId != Id);
+            .AnyAsync(x => x.Code == M.Code.Trim() && x.ProductId != Id);
 
         if (exists)
         {

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using PosLite.Common;
 
 namespace PosLite.Pages.Categories;
 
@@ -45,13 +46,18 @@ public class FormModalModel : PageModel
     /// <returns></returns>
     public async Task<IActionResult> OnPostAsync()
     {
+        Name = (Name ?? string.Empty).Trim();
+
         if (!ModelState.IsValid) return Page();
 
         try
         {
-            var exists = await _db.Categories.IgnoreQueryFilters()
-                .AnyAsync(x => x.CategoryId != (Id ?? Guid.Empty)
-                            && x.Name.ToLower() == Name.Trim().ToLower());
+            var norm = TextSearch.Normalize(Name);
+            var id = Id ?? Guid.Empty;
+            var exists = await _db.Categories
+                .IgnoreQueryFilters()
+                .AnyAsync(x => x.CategoryId != id && x.NameSearch == norm);
+
             if (exists)
             {
                 ModelState.AddModelError(nameof(Name), "Tên danh mục đã tồn tại.");

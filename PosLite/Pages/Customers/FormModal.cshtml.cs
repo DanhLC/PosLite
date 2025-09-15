@@ -26,13 +26,14 @@ public class FormModalModel : PageModel
         public bool IsActive { get; set; } = true;
     }
 
-    private static string GenCode() => "CUS" + Guid.NewGuid().ToString("N")[..6].ToUpperInvariant();
+    private static string GenCode() => "KH" + Guid.NewGuid().ToString("N")[..6].ToUpperInvariant();
 
     public async Task OnGet()
     {
         if (Id.HasValue)
         {
             var c = await _db.Customers.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.CustomerId == Id.Value);
+
             if (c != null)
             {
                 M = new InputModel
@@ -61,7 +62,7 @@ public class FormModalModel : PageModel
         }
 
         var codeExists = await _db.Customers.IgnoreQueryFilters()
-            .AnyAsync(x => x.Code == M.Code && x.CustomerId != Id);
+            .AnyAsync(x => x.Code == M.Code.Trim() && x.CustomerId != Id);
         if (codeExists)
         {
             ModelState.AddModelError("M.Code", "Mã khách hàng đã tồn tại.");
