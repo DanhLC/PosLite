@@ -1,248 +1,258 @@
 ﻿@page "/danh-muc"
 @model PosLite.Pages.Categories.IndexModel
 @{
-    ViewData["Title"] = "Quản lý danh mục";
+	ViewData["Title"] = "Quản lý danh mục";
 }
 
 <div class="d-flex align-items-center justify-content-between mb-3 mx-auto">
-    <div>
-        <h1 class="h4 mb-1">Danh mục</h1>
-        <div class="text-secondary small">Quản lý danh mục sản phẩm</div>
-    </div>
+	<div>
+		<h1 class="h4 mb-1">Danh mục</h1>
+		<div class="text-secondary small">Quản lý danh mục sản phẩm</div>
+	</div>
 
-    <div class="d-flex gap-2">
-        <button class="btn btn-primary"
-                data-bs-toggle="modal" data-bs-target="#catModal"
-                hx-get="/Categories/FormModal"
-                hx-target="#catModalContent" hx-swap="innerHTML">
-            <i class="bi bi-plus-lg me-1"></i> Thêm danh mục
-        </button>
+	<div class="d-flex gap-2">
+		<button class="btn btn-primary"
+				data-bs-toggle="modal" data-bs-target="#catModal"
+				hx-get="/Categories/FormModal"
+				hx-target="#catModalContent" hx-swap="innerHTML">
+			<i class="bi bi-plus-lg me-1"></i> Thêm danh mục
+		</button>
 
-        <button class="btn btn-danger" id="btnBulkDelete" disabled>
-            <i class="bi bi-trash3 me-1"></i> Xóa
-        </button>
-    </div>
+		<button class="btn btn-danger" id="btnBulkDelete" disabled>
+			<i class="bi bi-trash3 me-1"></i> Xóa
+		</button>
+	</div>
 </div>
 
 <form method="get" class="row g-2 mb-3">
-    <input type="hidden" name="pageIndex" value="1" />
-    <div class="col-sm-6 col-lg-4">
-        <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input name="q" value="@Model.q" class="form-control" placeholder="Tìm theo tên..." />
-        </div>
-    </div>
-    <div class="col-sm-3 col-lg-2">
-        <select name="status" class="form-select">
-            <option value="all" selected="@(Model.status=="all"?"selected":null)">Tất cả</option>
-            <option value="active" selected="@(Model.status=="active"?"selected":null)">Sử dụng</option>
-            <option value="inactive" selected="@(Model.status=="inactive"?"selected":null)">Ngừng sử dụng</option>
-        </select>
-    </div>
-    <div class="col-sm-3 col-lg-2">
-        <select name="pageSize" class="form-select">
-            @foreach (var s in new[] { 10, 20, 30, 50 })
-            {
-                <option value="@s" selected="@(Model.pageSize==s?"selected":null)">@s / trang</option>
-            }
-        </select>
-    </div>
-    <div class="col-auto">
-        <button class="btn btn-outline-secondary">Lọc</button>
-    </div>
+	<input type="hidden" name="pageIndex" value="1" />
+	<div class="col-sm-6 col-lg-4">
+		<div class="input-group">
+			<span class="input-group-text"><i class="bi bi-search"></i></span>
+			<input name="q" value="@Model.q" class="form-control" placeholder="Tìm theo tên..." />
+		</div>
+	</div>
+	<div class="col-sm-3 col-lg-2">
+		<select name="status"
+				class="form-select select-enhanced"
+				placeholder="Chọn trạng thái"
+				data-search="true"
+				data-allow-clear="true"
+				data-autosubmit="false">
+			<option value="all" selected="@(Model.status=="all"?"selected":null)">Tất cả</option>
+			<option value="active" selected="@(Model.status=="active"?"selected":null)">Sử dụng</option>
+			<option value="inactive" selected="@(Model.status=="inactive"?"selected":null)">Ngừng sử dụng</option>
+		</select>
+	</div>
+	<div class="col-sm-3 col-lg-2">
+		<select name="pageSize"
+				class="form-select select-enhanced"
+				placeholder="Chọn số dòng trên trang"
+				data-search="true"
+				data-allow-clear="true"
+				data-autosubmit="false">
+			@foreach (var s in new[] { 10, 20, 30, 50 })
+			{
+				<option value="@s" selected="@(Model.pageSize==s?"selected":null)">@s / trang</option>
+			}
+		</select>
+	</div>
+	<div class="col-auto">
+		<button class="btn btn-outline-secondary">Lọc</button>
+	</div>
 </form>
 
 <div class="modal fade" id="catModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" id="catModalContent"></div>
-    </div>
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content" id="catModalContent"></div>
+	</div>
 </div>
 
 <div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-exclamation-triangle text-danger me-2"></i> Xóa danh mục</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-2">Bạn có chắc muốn xóa các danh mục sau?</div>
-                <ul id="delNames" class="mb-0"></ul>
-            </div>
-            <div class="modal-footer">
-                <form method="post" asp-page-handler="BulkDelete" id="bulkDeleteForm"
-                      asp-antiforgery="true"
-                      asp-route-q="@Model.q" asp-route-status="@Model.status"
-                      asp-route-pageIndex="@Model.pageIndex" asp-route-pageSize="@Model.pageSize">
-                    <div id="delHiddenInputs"></div>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Không</button>
-                    <button type="submit" class="btn btn-danger">Có</button>
-                </form>
-            </div>
-        </div>
-    </div>
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title"><i class="bi bi-exclamation-triangle text-danger me-2"></i> Xóa danh mục</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<div class="mb-2">Bạn có chắc muốn xóa các danh mục sau?</div>
+				<ul id="delNames" class="mb-0"></ul>
+			</div>
+			<div class="modal-footer">
+				<form method="post" asp-page-handler="BulkDelete" id="bulkDeleteForm"
+					  asp-antiforgery="true"
+					  asp-route-q="@Model.q" asp-route-status="@Model.status"
+					  asp-route-pageIndex="@Model.pageIndex" asp-route-pageSize="@Model.pageSize">
+					<div id="delHiddenInputs"></div>
+					<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Không</button>
+					<button type="submit" class="btn btn-danger">Có</button>
+				</form>
+			</div>
+		</div>
+	</div>
 </div>
 
 <div class="card">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th style="width:36px">
-                        <input class="form-check-input" type="checkbox" id="checkAll" />
-                    </th>
-                    <th style="width:36px">#</th>
-                    <th>Tên danh mục</th>
-                    <th>Người tạo</th>
-                    <th>Ngày tạo</th>
-                    <th>Người cập nhật</th>
-                    <th>Ngày cập nhật</th>
-                    <th>Trạng thái</th>
-                    <th style="width:160px" class="text-end">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.Items.Count == 0)
-                {
-                    <tr><td colspan="9" class="text-center text-secondary py-4">Không có dữ liệu.</td></tr>
-                }
-                else
-                {
-                    var idx = (Model.pageIndex - 1) * Model.pageSize;
-                    foreach (var r in Model.Items)
-                    {
-                        idx++;
-                        <tr data-name="@r.Name">
-                            <td>
-                                <input class="form-check-input row-check" type="checkbox"
-                                       value="@r.Id" data-name="@r.Name" />
-                            </td>
-                            <td>@idx</td>
-                            <td>@r.Name</td>
-                            <td class="text-secondary small">@r.CreatedBy</td>
-                            <td class="text-secondary small">@r.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
-                            <td class="text-secondary small">@r.UpdatedBy</td>
-                            <td class="text-secondary small">
-                                @(r.UpdatedAt.HasValue ? r.UpdatedAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm") : "-")
-                            </td>
-                            <td>
-                                @if (r.IsActive)
-                                {
-                                    <span class="badge text-bg-success">Sử dụng</span>
-                                }
-                                else
-                                {
-                                    <span class="badge text-bg-secondary">Ngừng sử dụng</span>
-                                }
-                            </td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-primary"
-                                        data-bs-toggle="modal" data-bs-target="#catModal"
-                                        hx-get="/Categories/FormModal?id=@r.Id"
-                                        hx-target="#catModalContent" hx-swap="innerHTML">
-                                    <i class="bi bi-pencil-square"></i> Sửa
-                                </button>
+	<div class="table-responsive">
+		<table class="table table-hover align-middle mb-0">
+			<thead class="table-light">
+				<tr>
+					<th style="width:36px">
+						<input class="form-check-input" type="checkbox" id="checkAll" />
+					</th>
+					<th style="width:36px">#</th>
+					<th>Tên danh mục</th>
+					<th>Người tạo</th>
+					<th>Ngày tạo</th>
+					<th>Người cập nhật</th>
+					<th>Ngày cập nhật</th>
+					<th>Trạng thái</th>
+					<th style="width:160px" class="text-end">Thao tác</th>
+				</tr>
+			</thead>
+			<tbody>
+				@if (Model.Items.Count == 0)
+				{
+					<tr><td colspan="9" class="text-center text-secondary py-4">Không có dữ liệu.</td></tr>
+				}
+				else
+				{
+					var idx = (Model.pageIndex - 1) * Model.pageSize;
+					foreach (var r in Model.Items)
+					{
+						idx++;
+						<tr data-name="@r.Name">
+							<td>
+								<input class="form-check-input row-check" type="checkbox"
+									   value="@r.Id" data-name="@r.Name" />
+							</td>
+							<td>@idx</td>
+							<td>@r.Name</td>
+							<td class="text-secondary small">@r.CreatedBy</td>
+							<td class="text-secondary small">@r.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+							<td class="text-secondary small">@r.UpdatedBy</td>
+							<td class="text-secondary small">
+								@(r.UpdatedAt.HasValue ? r.UpdatedAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm") : "-")
+							</td>
+							<td>
+								@if (r.IsActive)
+								{
+									<span class="badge text-bg-success">Sử dụng</span>
+								}
+								else
+								{
+									<span class="badge text-bg-secondary">Ngừng sử dụng</span>
+								}
+							</td>
+							<td class="text-end">
+								<button class="btn btn-sm btn-outline-primary"
+										data-bs-toggle="modal" data-bs-target="#catModal"
+										hx-get="/Categories/FormModal?id=@r.Id"
+										hx-target="#catModalContent" hx-swap="innerHTML">
+									<i class="bi bi-pencil-square"></i> Sửa
+								</button>
 
-                                @if (r.IsActive)
-                                {
-                                    <form method="post" asp-page-handler="Deactivate" class="d-inline"
-                                          asp-route-q="@Model.q" asp-route-status="@Model.status"
-                                          asp-route-pageIndex="@Model.pageIndex" asp-route-pageSize="@Model.pageSize">
-                                        <input type="hidden" name="id" value="@r.Id" />
-                                        <button class="btn btn-sm btn-outline-warning">
-                                            <i class="bi bi-toggle-off"></i> Tắt
-                                        </button>
-                                    </form>
-                                }
-                                else
-                                {
-                                    <form method="post" asp-page-handler="Activate" class="d-inline"
-                                          asp-route-q="@Model.q" asp-route-status="@Model.status"
-                                          asp-route-pageIndex="@Model.pageIndex" asp-route-pageSize="@Model.pageSize">
-                                        <input type="hidden" name="id" value="@r.Id" />
-                                        <button class="btn btn-sm btn-outline-success">
-                                            <i class="bi bi-toggle-on"></i> Bật
-                                        </button>
-                                    </form>
-                                }
-                            </td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
-    </div>
+								@if (r.IsActive)
+								{
+									<form method="post" asp-page-handler="Deactivate" class="d-inline"
+										  asp-route-q="@Model.q" asp-route-status="@Model.status"
+										  asp-route-pageIndex="@Model.pageIndex" asp-route-pageSize="@Model.pageSize">
+										<input type="hidden" name="id" value="@r.Id" />
+										<button class="btn btn-sm btn-outline-warning">
+											<i class="bi bi-toggle-off"></i> Tắt
+										</button>
+									</form>
+								}
+								else
+								{
+									<form method="post" asp-page-handler="Activate" class="d-inline"
+										  asp-route-q="@Model.q" asp-route-status="@Model.status"
+										  asp-route-pageIndex="@Model.pageIndex" asp-route-pageSize="@Model.pageSize">
+										<input type="hidden" name="id" value="@r.Id" />
+										<button class="btn btn-sm btn-outline-success">
+											<i class="bi bi-toggle-on"></i> Bật
+										</button>
+									</form>
+								}
+							</td>
+						</tr>
+					}
+				}
+			</tbody>
+		</table>
+	</div>
 
-    @if (Model.TotalPages > 1)
-    {
-        <div class="card-footer">
-            <nav>
-                <ul class="pagination mb-0">
-                    <li class="page-item @(Model.pageIndex<=1?"disabled":"")">
-                        <a class="page-link"
-                           asp-page="./Index"
-                           asp-route-q="@Model.q" asp-route-status="@Model.status"
-                           asp-route-pageIndex="@(Model.pageIndex-1)" asp-route-pageSize="@Model.pageSize">Previous</a>
-                    </li>
+	@if (Model.TotalPages > 1)
+	{
+		<div class="card-footer">
+			<nav>
+				<ul class="pagination mb-0">
+					<li class="page-item @(Model.pageIndex<=1?"disabled":"")">
+						<a class="page-link"
+						   asp-page="./Index"
+						   asp-route-q="@Model.q" asp-route-status="@Model.status"
+						   asp-route-pageIndex="@(Model.pageIndex-1)" asp-route-pageSize="@Model.pageSize">Previous</a>
+					</li>
 
-                    @for (int i = 1; i <= Model.TotalPages; i++)
-                    {
-                        <li class="page-item @(i==Model.pageIndex?"active":"")">
-                            <a class="page-link"
-                               asp-page="./Index"
-                               asp-route-q="@Model.q" asp-route-status="@Model.status"
-                               asp-route-pageIndex="@i" asp-route-pageSize="@Model.pageSize">@i</a>
-                        </li>
-                    }
+					@for (int i = 1; i <= Model.TotalPages; i++)
+					{
+						<li class="page-item @(i==Model.pageIndex?"active":"")">
+							<a class="page-link"
+							   asp-page="./Index"
+							   asp-route-q="@Model.q" asp-route-status="@Model.status"
+							   asp-route-pageIndex="@i" asp-route-pageSize="@Model.pageSize">@i</a>
+						</li>
+					}
 
-                    <li class="page-item @(Model.pageIndex>=Model.TotalPages?"disabled":"")">
-                        <a class="page-link"
-                           asp-page="./Index"
-                           asp-route-q="@Model.q" asp-route-status="@Model.status"
-                           asp-route-pageIndex="@(Model.pageIndex+1)" asp-route-pageSize="@Model.pageSize">Next</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    }
+					<li class="page-item @(Model.pageIndex>=Model.TotalPages?"disabled":"")">
+						<a class="page-link"
+						   asp-page="./Index"
+						   asp-route-q="@Model.q" asp-route-status="@Model.status"
+						   asp-route-pageIndex="@(Model.pageIndex+1)" asp-route-pageSize="@Model.pageSize">Next</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	}
 </div>
 
 @section Scripts {
-    <script>
-        function updateBulkButton(){
-          const any = document.querySelectorAll('.row-check:checked').length > 0;
-          const btn = document.getElementById('btnBulkDelete');
-          if (btn) btn.disabled = !any;
-        }
+	<script>
+		function updateBulkButton(){
+		  const any = document.querySelectorAll('.row-check:checked').length > 0;
+		  const btn = document.getElementById('btnBulkDelete');
+		  if (btn) btn.disabled = !any;
+		}
 
-        document.getElementById('checkAll')?.addEventListener('change', (e)=>{
-          document.querySelectorAll('.row-check').forEach(c => { c.checked = e.target.checked; });
-          updateBulkButton();
-        });
+		document.getElementById('checkAll')?.addEventListener('change', (e)=>{
+		  document.querySelectorAll('.row-check').forEach(c => { c.checked = e.target.checked; });
+		  updateBulkButton();
+		});
 
-        document.querySelectorAll('.row-check').forEach(c => c.addEventListener('change', updateBulkButton));
+		document.querySelectorAll('.row-check').forEach(c => c.addEventListener('change', updateBulkButton));
 
-        document.getElementById('btnBulkDelete')?.addEventListener('click', () => {
-          const checked = [...document.querySelectorAll('.row-check:checked')];
-          if (checked.length === 0) { window.appToast?.err('Chưa chọn sản phẩm.'); return; }
+		document.getElementById('btnBulkDelete')?.addEventListener('click', () => {
+		  const checked = [...document.querySelectorAll('.row-check:checked')];
+		  if (checked.length === 0) { window.appToast?.err('Chưa chọn sản phẩm.'); return; }
 
-          const ul = document.getElementById('delNames');
-          const holder = document.getElementById('delHiddenInputs');
-          ul.replaceChildren?.() ?? (ul.innerHTML = '');
-          holder.replaceChildren?.() ?? (holder.innerHTML = '');
+		  const ul = document.getElementById('delNames');
+		  const holder = document.getElementById('delHiddenInputs');
+		  ul.replaceChildren?.() ?? (ul.innerHTML = '');
+		  holder.replaceChildren?.() ?? (holder.innerHTML = '');
 
-          checked.forEach(c => {
-            const name = c.dataset.name || c.closest('tr')?.getAttribute('data-name') || c.value;
-            const li = document.createElement('li');
-            li.innerHTML = '<strong>' + name + '</strong>';
-            ul.appendChild(li);
+		  checked.forEach(c => {
+			const name = c.dataset.name || c.closest('tr')?.getAttribute('data-name') || c.value;
+			const li = document.createElement('li');
+			li.innerHTML = '<strong>' + name + '</strong>';
+			ul.appendChild(li);
 
-            const input = document.createElement('input');
-            input.type = 'hidden'; input.name = 'ids'; input.value = c.value;
-            holder.appendChild(input);
-          });
+			const input = document.createElement('input');
+			input.type = 'hidden'; input.name = 'ids'; input.value = c.value;
+			holder.appendChild(input);
+		  });
 
-          new bootstrap.Modal(document.getElementById('bulkDeleteModal')).show();
-        });
-    </script>
+		  new bootstrap.Modal(document.getElementById('bulkDeleteModal')).show();
+		});
+	</script>
 }

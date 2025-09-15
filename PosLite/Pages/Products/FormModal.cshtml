@@ -37,7 +37,12 @@
 
         <div class="mb-3">
             <label class="form-label">Danh mục</label><label style="color:red">*</label>
-            <select asp-for="M.CategoryId" class="form-select">
+            <select asp-for="M.CategoryId"
+                    class="form-select select-enhanced"
+                    placeholder="Chọn số dòng trên trang"
+                    data-search="true"
+                    data-allow-clear="true"
+                    data-autosubmit="false">
                 <option value="">-- Chọn --</option>
                 @foreach (var c in Model.Categories)
                 {

@@ -17,7 +17,12 @@
 
         <div class="mb-3">
             <label class="form-label">Sản phẩm</label>
-            <select asp-for="M.ProductId" class="form-select">
+            <select asp-for="M.ProductId"
+                    class="form-select select-enhanced"
+                    placeholder="Chọn sản phẩm"
+                    data-search="true"
+                    data-allow-clear="true"
+                    data-autosubmit="false">
                 @foreach (var p in Model.Products)
                 {
                     <option value="@p.Id">@p.Name</option>

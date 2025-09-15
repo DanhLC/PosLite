@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <script>
@@ -35,9 +37,40 @@
       const a = e.target.closest('a[data-loading]');
       if (a) showLoading();
     }, true);
+
+    (function () {
+      function initChoices(root = document) {
+        root.querySelectorAll('select.select-enhanced').forEach(el => {
+          if (el.dataset.choices === 'ok') return; // tránh init 2 lần
+
+          new Choices(el, {
+            searchEnabled: el.dataset.search !== 'false',            // data-search="false" để tắt ô tìm
+            removeItemButton: el.dataset.allowClear === 'true',      // data-allow-clear="true" để có nút clear (multi/select)
+            shouldSort: false,
+            placeholder: true,
+            placeholderValue: el.getAttribute('placeholder') || 'Chọn...',
+            itemSelectText: 'Nhấn để chọn',
+            noResultsText: 'Không tìm thấy dữ liệu',
+            noChoicesText: 'Không có lựa chọn',
+            searchPlaceholderValue: 'Gõ để tìm…'
+          });
+
+          el.dataset.choices = 'ok';
+
+          if (el.dataset.autosubmit === 'true') {
+            el.addEventListener('change', () => {
+              const form = el.closest('form');
+              if (form) form.submit();
+            });
+          }
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', () => initChoices());
+      document.addEventListener('htmx:afterSwap', e => initChoices(e.target));
+    })();
 </script>
 <body>
-
     <aside class="sidebar d-none d-lg-block">
         @await Html.PartialAsync("_Sidebar")
     </aside>

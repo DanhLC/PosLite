@@ -39,14 +39,24 @@
         </div>
     </div>
     <div class="col-lg-2">
-        <select name="status" class="form-select">
+        <select name="status"
+                class="form-select select-enhanced"
+                placeholder="Chọn trạng thái"
+                data-search="true"
+                data-allow-clear="true"
+                data-autosubmit="false">
             <option value="all" selected="@(Model.status=="all"?"selected":null)">Tất cả</option>
             <option value="active" selected="@(Model.status=="active"?"selected":null)">Đang dùng</option>
             <option value="inactive" selected="@(Model.status=="inactive"?"selected":null)">Ngừng dùng</option>
         </select>
     </div>
     <div class="col-lg-2">
-        <select name="percent" class="form-select">
+        <select name="percent"
+                class="form-select select-enhanced"
+                placeholder="Chọn % giảm giá"
+                data-search="true"
+                data-allow-clear="true"
+                data-autosubmit="false">
             <option value="">-- Tất cả % --</option>
             @foreach (var p in Model.DistinctPercents)
             {
@@ -55,7 +65,12 @@
         </select>
     </div>
     <div class="col-lg-2">
-        <select name="pageSize" class="form-select">
+        <select name="pageSize"
+                class="form-select select-enhanced"
+                placeholder="Chọn số dòng trên trang"
+                data-search="true"
+                data-allow-clear="true"
+                data-autosubmit="false">
             @foreach (var s in new[] { 10, 20, 30, 50 })
             {
                 <option value="@s" selected="@(Model.pageSize==s?"selected":null)">@s / trang</option>
