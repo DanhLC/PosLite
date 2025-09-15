@@ -49,7 +49,6 @@
                     placeholder="Gõ để tìm khách hàng..."
                     data-search="true"
                     data-allow-clear="true">
-                <option value="">Tất cả</option>
                 @foreach (var c in Model.Customers)
                 {
                     <option value="@c.Id">@c.Name</option>
