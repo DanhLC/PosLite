@@ -18,8 +18,8 @@ public class FormModalModel : PageModel
 
     public class InputModel
     {
-        [Required] public Guid? ProductId { get; set; }
-        [Required] public Guid? CustomerId { get; set; }
+        [Required(ErrorMessage = "Vui lòng chọn sản phẩm")] public Guid? ProductId { get; set; }
+        [Required(ErrorMessage = "Vui lòng chọn khách hàng áp dụng")] public Guid? CustomerId { get; set; }
         [Range(0, 100, ErrorMessage = "0–100%")] public double Percent { get; set; }
         public bool IsActive { get; set; } = true;
     }

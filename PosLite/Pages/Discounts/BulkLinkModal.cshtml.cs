@@ -17,9 +17,10 @@ public class BulkLinkModalModel : PageModel
 
     public class InputModel
     {
-        [Required] public Guid? ProductId { get; set; }
-        [Range(0, 100)] public double Percent { get; set; }
-        [Required] public List<Guid> CustomerIds { get; set; } = new();
+        [Required(ErrorMessage = "Vui lòng chọn sản phẩm")] public Guid? ProductId { get; set; }
+        [MinLength(1, ErrorMessage = "Vui lòng chọn ít nhất 1 khách hàng")]
+        public List<Guid> CustomerIds { get; set; } = new();
+        [Range(0, 100, ErrorMessage = "0–100%")] public double Percent { get; set; }
     }
 
     public async Task OnGet()
@@ -38,7 +39,6 @@ public class BulkLinkModalModel : PageModel
 
         var pid = M.ProductId!.Value;
 
-        // Lấy tất cả bản ghi hiện có của nhóm KH này trên SP này để update nhanh
         var existing = await _db.CustomerProductDiscounts
             .IgnoreQueryFilters()
             .Where(x => x.ProductId == pid && M.CustomerIds.Contains(x.CustomerId))

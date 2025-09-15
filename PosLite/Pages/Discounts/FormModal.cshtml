@@ -24,6 +24,7 @@
                     data-search="true"
                     data-allow-clear="true"
                     data-autosubmit="false">
+                <option value="">Tất cả</option>
                 @foreach (var p in Model.Products)
                 {
                     <option value="@p.Id">@p.Name</option>
@@ -40,6 +41,7 @@
                     data-search="true"
                     data-allow-clear="true"
                     data-autosubmit="false">
+                <option value="">Tất cả</option>
                 @foreach (var c in Model.Customers)
                 {
                     <option value="@c.Id">@c.Name</option>
