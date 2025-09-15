@@ -79,15 +79,6 @@
     </form>
 </div>
 
-@if (!ViewData.ModelState.IsValid)
-{
-    <script> window.appToast?.err('Vui lòng kiểm tra lại các trường.'); </script>
-}
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
-
 <script>
     (function () {
       const display = document.getElementById('PriceDisplay');
@@ -114,7 +105,7 @@
 
       display.addEventListener('input', () => {
         const v = display.value.replace(/[^\d,]/g, '');
-        hidden.value = v; 
+        hidden.value = v;
       });
       display.addEventListener('blur', syncHiddenFromDisplay);
       syncHiddenFromDisplay();
@@ -132,3 +123,12 @@
       });
     })();
 </script>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <script> window.appToast?.err('Vui lòng kiểm tra lại các trường.'); </script>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

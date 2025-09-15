@@ -27,7 +27,7 @@ public class FormModalModel : PageModel
         [StringLength(200, ErrorMessage = "Tên tối đa 200 ký tự")]
         public string Name { get; set; } = "";
 
-        public string Unit { get; set; } = "";
+        public string? Unit { get; set; }
 
         [Required(ErrorMessage = "Vui lòng chọn danh mục")]
         public Guid? CategoryId { get; set; }
@@ -127,10 +127,10 @@ public class FormModalModel : PageModel
         {
             var html = @"<script>
                 window.appToast?.ok('Lưu sản phẩm thành công.');
-                const el = document.getElementById('prodModal');
-                if (el) bootstrap.Modal.getInstance(el)?.hide();
-                window.location.reload();
-            </script>";
+                    const el = document.getElementById('catModal');
+                    if (el) bootstrap.Modal.getInstance(el)?.hide();
+                    window.location.reload();
+                </script>";
             return Content(html, "text/html");
         }
 

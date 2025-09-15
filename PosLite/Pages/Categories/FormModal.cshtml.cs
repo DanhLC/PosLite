@@ -10,12 +10,9 @@ public class FormModalModel : PageModel
 {
     private readonly AppDb _db;
     public FormModalModel(AppDb db) => _db = db;
-
-    // query id (null => create)
     [BindProperty(SupportsGet = true)] public Guid? Id { get; set; }
     public bool IsEdit => Id.HasValue;
 
-    // form fields
     [BindProperty, Required, StringLength(200)]
     public string Name { get; set; } = "";
     [BindProperty] public bool IsActive { get; set; } = true;
@@ -88,14 +85,20 @@ public class FormModalModel : PageModel
 
             await _db.SaveChangesAsync();
 
-            var js = """
-                 <script>
-                   const m = bootstrap.Modal.getInstance(document.getElementById('catModal'));
-                   if (m) m.hide();
-                   window.location.reload();
-                 </script>
-                 """;
-            return Content(js, "text/html");
+            if (Request.Headers.ContainsKey("HX-Request"))
+            {
+                var html = @"<script>
+                    window.appToast?.ok('Lưu danh mục thành công.');
+                    const el = document.getElementById('catModal');
+                    if (el) bootstrap.Modal.getInstance(el)?.hide();
+                    window.location.reload();
+                </script>";
+                return Content(html, "text/html");
+            }
+
+            TempData["Toast.Type"] = "success";
+            TempData["Toast.Text"] = "Lưu danh mục thành công.";
+            return RedirectToPage("./Index");
         }
         catch (Exception)
         {

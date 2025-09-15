@@ -54,12 +54,7 @@ public class ChangePasswordModalModel : PageModel
 
         await _signInManager.RefreshSignInAsync(user);
 
-        return Content("""
-            <script>
-              window.appToast?.ok('Đổi mật khẩu thành công.');
-              const m = bootstrap.Modal.getInstance(document.getElementById('pwdModal'));
-              if (m) m.hide();
-            </script>
-        """, "text/html");
+        Response.Headers["HX-Trigger"] = "pwd-changed";
+        return new EmptyResult();
     }
 }

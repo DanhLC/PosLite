@@ -42,7 +42,7 @@ public class Product : BaseEntity
     public Guid ProductId { get; set; }
     public string Code { get; set; } = default!;
     public string Name { get; set; } = default!;
-    public string Unit { get; set; } = "";
+    public string? Unit { get; set; } = "";
     public Guid? CategoryId { get; set; }
     public decimal Price { get; set; }
     public string NameSearch { get; set; } = "";
