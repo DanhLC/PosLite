@@ -1,0 +1,64 @@
+﻿@page
+@model PosLite.Pages.Customers.FormModalModel
+@{
+    Layout = null;
+    var isEdit = Model.Id.HasValue;
+}
+
+<div class="modal-header">
+    <h5 class="modal-title">@((isEdit ? "Sửa" : "Thêm") + " khách hàng")</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <form hx-post="/Customers/FormModal@(Model.Id.HasValue ? $"?id={Model.Id}" : "")"
+          hx-target="#custModalContent" hx-swap="innerHTML" asp-antiforgery="true">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+        <div class="mb-3">
+            <label class="form-label">Mã</label>
+            <input asp-for="M.Code" class="form-control" />
+            <span class="text-danger" asp-validation-for="M.Code"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Tên</label>
+            <input asp-for="M.Name" class="form-control" />
+            <span class="text-danger" asp-validation-for="M.Name"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Số điện thoại</label>
+            <input asp-for="M.Phone" class="form-control" />
+            <span class="text-danger" asp-validation-for="M.Phone"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Địa chỉ</label>
+            <input asp-for="M.Address" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label d-block">Trạng thái</label>
+            <div class="form-check form-switch">
+                <input class="form-check-input" asp-for="M.IsActive" />
+                <label class="form-check-label" asp-for="M.IsActive">Sử dụng</label>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button class="btn btn-primary" type="submit">Lưu</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <script> window.appToast?.err('Vui lòng kiểm tra lại các trường.'); </script>
+}

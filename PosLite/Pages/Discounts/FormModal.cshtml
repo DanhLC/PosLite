@@ -1,0 +1,72 @@
+﻿@page
+@model PosLite.Pages.Discounts.FormModalModel
+@{
+    Layout = null;
+    var isEdit = Model.Id.HasValue;
+}
+
+<div class="modal-header">
+    <h5 class="modal-title">@((isEdit ? "Sửa" : "Thêm") + " liên kết giảm giá")</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <form hx-post="/Discounts/FormModal@(Model.Id.HasValue ? $"?id={Model.Id}" : "")"
+          hx-target="#discModalContent" hx-swap="innerHTML" asp-antiforgery="true">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+        <div class="mb-3">
+            <label class="form-label">Sản phẩm</label>
+            <select asp-for="M.ProductId" class="form-select">
+                @foreach (var p in Model.Products)
+                {
+                    <option value="@p.Id">@p.Name</option>
+                }
+            </select>
+            <span class="text-danger" asp-validation-for="M.ProductId"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Khách hàng</label>
+            <select asp-for="M.CustomerId" class="form-select">
+                @foreach (var c in Model.Customers)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            </select>
+            <span class="text-danger" asp-validation-for="M.CustomerId"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Phần trăm</label>
+            <div class="input-group">
+                <input asp-for="M.Percent" step="0.01" class="form-control" />
+                <span class="input-group-text">%</span>
+            </div>
+            <span class="text-danger" asp-validation-for="M.Percent"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label d-block">Trạng thái</label>
+            <div class="form-check form-switch">
+                <input class="form-check-input" asp-for="M.IsActive" />
+                <label class="form-check-label" asp-for="M.IsActive">Sử dụng</label>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button class="btn btn-primary" type="submit">Lưu</button>
+        </div>
+    </form>
+</div>
+
+@if (!ViewData.ModelState.IsValid)
+{
+     <script>window.appToast?.err('Vui lòng kiểm tra lại các trường.');</script>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,132 @@
+﻿@page
+@model PosLite.Pages.Customers.AdjustDebtModalModel
+@using System.Globalization
+@{
+    Layout = null;
+    var vi = CultureInfo.GetCultureInfo("vi-VN");
+    var initAmount = Model.M?.Amount > 0 ? Model.M.Amount.ToString("N0", vi) : "0";
+}
+
+<div class="modal-header">
+    <h5 class="modal-title">Điều chỉnh công nợ — @Model.CustomerName</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <div class="small text-secondary mb-2">
+        Công nợ hiện tại: <strong>@string.Format("{0:N0}", Model.CurrentBalance)</strong>
+    </div>
+
+    <form hx-post="/Customers/AdjustDebtModal?id=@Model.Id"
+          hx-target="#adjustModalContent" hx-swap="innerHTML" asp-antiforgery="true">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+        <div class="mb-3">
+            <label class="form-label d-block">Kiểu điều chỉnh</label>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" asp-for="M.Mode" value="delta" checked />
+                <label class="form-check-label">Cộng/Trừ một khoản</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" asp-for="M.Mode" value="set" />
+                <label class="form-check-label">Đặt số dư bằng...</label>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Số tiền (VND)</label>
+            <!-- Ô hiển thị cho người dùng -->
+            <input id="AmountDisplay"
+                   class="form-control text-end"
+                   inputmode="numeric" autocomplete="off"
+                   value="@initAmount" />
+
+            <!-- Giá trị thật gửi về server -->
+            <input asp-for="M.Amount" type="hidden" id="M_Amount" />
+            <span class="text-danger" asp-validation-for="M.Amount"></span>
+        </div>
+
+        <div class="mb-3" data-mode="delta">
+            <label class="form-label d-block">Hướng điều chỉnh</label>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" asp-for="M.Direction" value="increase" checked />
+                <label class="form-check-label">Tăng nợ</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" asp-for="M.Direction" value="decrease" />
+                <label class="form-check-label">Giảm nợ</label>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ghi chú</label>
+            <input asp-for="M.Note" class="form-control" />
+            <span class="text-danger" asp-validation-for="M.Note"></span>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary">Lưu</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    (() => {
+      const wrap = document.querySelector('[data-mode="delta"]');
+      const radios = document.querySelectorAll('input[name="M.Mode"]');
+      function syncMode() {
+        const isDelta = document.querySelector('input[name="M.Mode"]:checked')?.value === 'delta';
+        if (wrap) wrap.style.display = isDelta ? '' : 'none';
+      }
+      radios.forEach(r => r.addEventListener('change', syncMode));
+      syncMode();
+    })();
+
+    (() => {
+      const txt = document.getElementById('AmountDisplay');
+      const hid = document.getElementById('M_Amount');
+      if (!txt || !hid) return;
+
+      const nf = new Intl.NumberFormat('vi-VN'); 
+
+      function onlyDigits(s) {
+        return (s || '').replace(/[^\d]/g, '');
+      }
+
+      function formatLive() {
+        const beforeLen = txt.value.length;
+        const caretBefore = txt.selectionStart ?? beforeLen;
+
+        const digits = onlyDigits(txt.value);
+        hid.value = digits === '' ? '0' : String(parseInt(digits, 10));
+
+        const formatted = digits ? nf.format(parseInt(digits, 10)) : '';
+        txt.value = formatted;
+
+        const afterLen = txt.value.length;
+        const delta = afterLen - beforeLen;
+
+        try {
+          const newPos = Math.max(0, caretBefore + delta);
+          txt.setSelectionRange(newPos, newPos);
+        } catch (_) { }
+      }
+
+      txt.addEventListener('focus', () => {
+        txt.value = onlyDigits(txt.value);
+        txt.select();
+      });
+
+      txt.addEventListener('input', formatLive);
+      txt.addEventListener('blur',  formatLive);
+
+      formatLive();
+    })();
+</script>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <script> window.appToast?.err('Vui lòng kiểm tra lại các trường.'); </script>
+}

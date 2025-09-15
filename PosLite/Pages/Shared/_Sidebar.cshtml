@@ -1,97 +1,117 @@
 ﻿@* _Sidebar.cshtml *@
 @functions {
-    string CurrentPage => (string?)ViewContext.RouteData.Values["page"] ?? "";
+	string CurrentPage => (string?)ViewContext.RouteData.Values["page"] ?? "";
 
-    bool PageStartsWith(string prefix)
-        => CurrentPage.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+	bool PageStartsWith(string prefix)
+		=> CurrentPage.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
 
-    bool InCatalog() =>
-        PageStartsWith("/Products") ||
-        PageStartsWith("/Categories") ||
-        PageStartsWith("/Discounts");
+	bool InCatalog() =>
+		PageStartsWith("/Products") ||
+		PageStartsWith("/Categories") ||
+		PageStartsWith("/Discounts");
+	bool InCatalogCustomer() =>
+		PageStartsWith("/Customers") ||
+		PageStartsWith("/CustomersHistory");
 }
 
 <nav class="sidebar-menu p-3">
-    <a class="d-flex align-items-center mb-4 text-decoration-none sidebar-brand" asp-page="/Index">
-        <i class="bi bi-lightning-charge-fill me-2 text-warning"></i>
-        <span class="fw-semibold">PosLite</span>
-    </a>
+	<a class="d-flex align-items-center mb-4 text-decoration-none sidebar-brand" asp-page="/Index">
+		<i class="bi bi-lightning-charge-fill me-2 text-warning"></i>
+		<span class="fw-semibold">PosLite</span>
+	</a>
 
-    <ul class="nav flex-column gap-1">
-        <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Index") ? " active" : "")"
-               asp-page="/Index">
-                <i class="bi bi-speedometer2"></i><span>Tổng quan</span>
-            </a>
-        </li>
+	<ul class="nav flex-column gap-1">
+		<li class="nav-item">
+			<a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Index") ? " active" : "")"
+			   asp-page="/Index">
+				<i class="bi bi-speedometer2"></i><span>Tổng quan</span>
+			</a>
+		</li>
 
-        <li class="text-uppercase small text-muted mt-3 mb-1 px-2">Quản lý</li>
+		<li class="text-uppercase small text-muted mt-3 mb-1 px-2">Quản lý</li>
 
-        <li class="nav-item">
-            <button type="button"
-                    class="nav-link btn-toggle d-flex align-items-center gap-2 w-100@(InCatalog() ? "" : " collapsed")"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#grpCatalog"
-                    aria-expanded="@(InCatalog().ToString().ToLower())"
-                    aria-controls="grpCatalog">
-                <i class="bi bi-box-seam"></i>
-                <span>Sản phẩm</span>
-                <i class="bi bi-chevron-down ms-auto chev@(InCatalog() ? " open" : "")"></i>
-            </button>
+		<li class="nav-item">
+			<button type="button"
+					class="nav-link btn-toggle d-flex align-items-center gap-2 w-100@(InCatalog() ? "" : " collapsed")"
+					data-bs-toggle="collapse"
+					data-bs-target="#grpCatalog"
+					aria-expanded="@(InCatalog().ToString().ToLower())"
+					aria-controls="grpCatalog">
+				<i class="bi bi-box-seam"></i>
+				<span>Sản phẩm</span>
+				<i class="bi bi-chevron-down ms-auto chev@(InCatalog() ? " open" : "")"></i>
+			</button>
 
-            <div id="grpCatalog" class="collapse@(InCatalog() ? " show" : "")">
-                <a class="nav-link sub d-flex align-items-center gap-2@(PageStartsWith("/Products") ? " active" : "")"
-                   asp-page="/Products/Index">
-                    <i class="bi bi-box"></i><span>Danh sách sản phẩm</span>
-                </a>
-                <a class="nav-link sub d-flex align-items-center gap-2@(PageStartsWith("/Categories") ? " active" : "")"
-                   asp-page="/Categories/Index">
-                    <i class="bi bi-tags"></i><span>Danh mục</span>
-                </a>
-                <a class="nav-link sub d-flex align-items-center gap-2@(PageStartsWith("/Discounts") ? " active" : "")"
-                   asp-page="/Discounts/Index">
-                    <i class="bi bi-percent"></i><span>Giảm giá</span>
-                </a>
-            </div>
-        </li>
+			<div id="grpCatalog" class="collapse@(InCatalog() ? " show" : "")">
+				<a class="nav-link sub d-flex align-items-center gap-2@(PageStartsWith("/Products") ? " active" : "")"
+				   asp-page="/Products/Index">
+					<i class="bi bi-box"></i><span>Danh sách SP</span>
+				</a>
+				<a class="nav-link sub d-flex align-items-center gap-2@(PageStartsWith("/Categories") ? " active" : "")"
+				   asp-page="/Categories/Index">
+					<i class="bi bi-tags"></i><span>Danh mục</span>
+				</a>
+				<a class="nav-link sub d-flex align-items-center gap-2@(PageStartsWith("/Discounts") ? " active" : "")"
+				   asp-page="/Discounts/Index">
+					<i class="bi bi-percent"></i><span>Giảm giá</span>
+				</a>
+			</div>
+		</li>
 
-        <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Customers") ? " active" : "")"
-               asp-page="/Customers/Index">
-                <i class="bi bi-people"></i><span>Khách hàng</span>
-            </a>
-        </li>
+		<li class="nav-item">
+			<button type="button"
+					class="nav-link btn-toggle d-flex align-items-center gap-2 w-100@(InCatalogCustomer() ? "" : " collapsed")"
+					data-bs-toggle="collapse"
+					data-bs-target="#grpCatalogCustomer"
+					aria-expanded="@(InCatalogCustomer().ToString().ToLower())"
+					aria-controls="grpCatalogCustomer">
+				<i class="bi bi-people"></i>
+				<span>Khách hàng</span>
+				<i class="bi bi-chevron-down ms-auto chev@(InCatalogCustomer() ? " open" : "")"></i>
+			</button>
 
-        <li class="text-uppercase small text-muted mt-3 mb-1 px-2">Hệ thống</li>
+			<div id="grpCatalogCustomer" class="collapse@(InCatalogCustomer() ? " show" : "")">
+				<a class="nav-link sub d-flex align-items-center gap-2@(PageStartsWith("/Customers") ? " active" : "")"
+				   asp-page="/Customers/Index">
+					<i class="bi bi-people"></i><span>Danh sách KH</span>
+				</a>
+				<a class="nav-link sub d-flex align-items-center gap-2@(PageStartsWith("/CustomersHistory") ? " active" : "")"
+				   asp-page="/CustomersHistory/Index">
+					<i class="bi bi-clock-history"></i><span>Lich sử giao dịch</span>
+				</a>
+			</div>
+		</li>
 
-        <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Users") ? " active" : "")"
-               asp-page="/Users/Index">
-                <i class="bi bi-person-gear"></i><span>Người dùng</span>
-            </a>
-        </li>
+		<li class="text-uppercase small text-muted mt-3 mb-1 px-2">Hệ thống</li>
 
-        <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Settings") ? " active" : "")"
-               asp-page="/Settings/Index">
-                <i class="bi bi-gear"></i><span>Cấu hình shop</span>
-            </a>
-        </li>
+		<li class="nav-item">
+			<a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Users") ? " active" : "")"
+			   asp-page="/Users/Index">
+				<i class="bi bi-person-gear"></i><span>Người dùng</span>
+			</a>
+		</li>
 
-        <hr />
-        <li class="text-uppercase small text-muted mt-3 mb-1 px-2">Phiên bản<span class="badge ms-1 text-black badge-sm" style="background-color:#f0bc74!important">1.0.0</span></li>
-    </ul>
+		<li class="nav-item">
+			<a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Settings") ? " active" : "")"
+			   asp-page="/Settings/Index">
+				<i class="bi bi-gear"></i><span>Cấu hình shop</span>
+			</a>
+		</li>
+
+		<hr />
+		<li class="text-uppercase small text-muted mt-3 mb-1 px-2">Phiên bản<span class="badge ms-1 text-black badge-sm" style="background-color:#f0bc74!important">1.0.0</span></li>
+	</ul>
 </nav>
 
 <script>
-    document.querySelectorAll('.sidebar-menu [data-bs-toggle="collapse"]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetSel = btn.getAttribute('data-bs-target');
-        const target = targetSel ? document.querySelector(targetSel) : null;
-        const icon = btn.querySelector('.chev');
-        setTimeout(() => {
-          icon?.classList.toggle('open', target?.classList.contains('show'));
-        }, 170);
-      });
-    });
+	document.querySelectorAll('.sidebar-menu [data-bs-toggle="collapse"]').forEach(btn => {
+	  btn.addEventListener('click', () => {
+		const targetSel = btn.getAttribute('data-bs-target');
+		const target = targetSel ? document.querySelector(targetSel) : null;
+		const icon = btn.querySelector('.chev');
+		setTimeout(() => {
+		  icon?.classList.toggle('open', target?.classList.contains('show'));
+		}, 170);
+	  });
+	});
 </script>

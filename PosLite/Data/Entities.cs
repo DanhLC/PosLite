@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PosLite.Common;
+using System.ComponentModel.DataAnnotations;
 
 // ====== Base & Identity ======
 public abstract class BaseEntity
@@ -25,6 +26,8 @@ public class Customer : BaseEntity
     public string Name { get; set; } = default!;
     public string? Phone { get; set; }
     public string? Address { get; set; }
+    public string NameSearch { get; set; } = "";
+    public string CodeSearch { get; set; } = "";
 }
 
 public class Category : BaseEntity
@@ -52,8 +55,6 @@ public class CustomerProductDiscount : BaseEntity
     public Guid CustomerId { get; set; }
     public Guid ProductId { get; set; }
     public double Percent { get; set; }
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
 }
 
 public class SaleInvoice : BaseEntity
@@ -101,6 +102,7 @@ public class CustomerLedger
     public int Debit { get; set; }
     public int Credit { get; set; }
     public int BalanceAfter { get; set; }
+    public string? Note { get; set; }
 }
 
 public class ShopSetting
@@ -177,6 +179,9 @@ public class AppDb : IdentityDbContext<AppUser>
         b.Entity<ShopSetting>().HasKey(x => x.Key);
 
         b.Entity<Customer>();
+        b.Entity<Customer>().HasIndex(x => x.NameSearch);
+        b.Entity<Customer>().HasIndex(x => x.CodeSearch);
+
         b.Entity<Category>().HasIndex(x => x.NameSearch);
 
         b.Entity<Product>().HasKey(x => x.ProductId);
@@ -184,8 +189,6 @@ public class AppDb : IdentityDbContext<AppUser>
         b.Entity<Product>().HasIndex(x => x.CodeSearch);
         b.Entity<Product>().HasIndex(x => x.Code).IsUnique();
         b.Entity<Product>().HasIndex(x => x.CategoryId);
-        b.Entity<Product>().HasIndex(x => x.NameSearch);
-        b.Entity<Product>().HasIndex(x => x.CodeSearch);
         b.Entity<Product>().Property(p => p.Price).HasColumnType("NUMERIC");
         b.Entity<CustomerProductDiscount>();
     }
@@ -216,6 +219,13 @@ public class AppDb : IdentityDbContext<AppUser>
                         pAdd.NameSearch = TextSearch.Normalize(pAdd.Name);
                         pAdd.CodeSearch = TextSearch.Normalize(pAdd.Code);
                     }
+
+                    if (e.Entity is Customer cuAdd)
+                    {
+                        cuAdd.NameSearch = TextSearch.Normalize(cuAdd.Name);
+                        cuAdd.CodeSearch = TextSearch.Normalize(cuAdd.Code);
+                    }
+
                     break;
 
                 case EntityState.Modified:
@@ -241,6 +251,15 @@ public class AppDb : IdentityDbContext<AppUser>
                             needAudit = false;
                     }
 
+                    if (e.Entity is Customer)
+                    {
+                        var names = e.Properties.Where(p => p.IsModified).Select(p => p.Metadata.Name).ToHashSet();
+                        names.RemoveWhere(n => n is nameof(BaseEntity.CreatedAt) or nameof(BaseEntity.CreatedBy)
+                                                 or nameof(BaseEntity.UpdatedAt) or nameof(BaseEntity.UpdatedBy));
+                        if (names.All(n => n is nameof(Customer.NameSearch) or nameof(Customer.CodeSearch)))
+                            needAudit = false;
+                    }
+
                     if (needAudit)
                     {
                         e.Entity.UpdatedAt = now;
@@ -248,7 +267,9 @@ public class AppDb : IdentityDbContext<AppUser>
                     }
 
                     if (e.Entity is Category cUpd && e.Property(nameof(Category.Name)).IsModified)
+                    {
                         cUpd.NameSearch = TextSearch.Normalize(cUpd.Name);
+                    }
 
                     if (e.Entity is Product pUpd)
                     {
@@ -256,6 +277,14 @@ public class AppDb : IdentityDbContext<AppUser>
                             pUpd.NameSearch = TextSearch.Normalize(pUpd.Name);
                         if (e.Property(nameof(Product.Code)).IsModified)
                             pUpd.CodeSearch = TextSearch.Normalize(pUpd.Code);
+                    }
+
+                    if (e.Entity is Customer custUpd)
+                    {
+                        if (e.Property(nameof(Customer.Name)).IsModified)
+                            custUpd.NameSearch = TextSearch.Normalize(custUpd.Name);
+                        if (e.Property(nameof(Customer.Code)).IsModified)
+                            custUpd.CodeSearch = TextSearch.Normalize(custUpd.Code);
                     }
                     break;
             }
