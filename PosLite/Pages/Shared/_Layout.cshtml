@@ -62,23 +62,31 @@
 	<main class="app-content">
 		<nav class="navbar navbar-light bg-body-tertiary border-bottom sticky-top">
 			<div class="container-fluid">
-				<button class="btn btn-outline-secondary d-lg-none" type="button"
+				<button class="btn btn-sm btn-outline-primary"
 						data-bs-toggle="offcanvas" data-bs-target="#appSidebar">
 					<i class="bi bi-list"></i>
 				</button>
 
 				<div class="ms-auto d-flex align-items-center gap-3">
 					<span class="small text-secondary d-none d-sm-inline">@User.Identity?.Name</span>
+
+					<button class="btn btn-sm btn-outline-primary"
+							data-bs-toggle="modal" data-bs-target="#pwdModal"
+							hx-get="/Account/ChangePasswordModal"
+							hx-target="#pwdModalContent" hx-swap="innerHTML">
+						<i class="bi bi-key me-1"></i> Đổi mật khẩu
+					</button>
+
 					<form method="post" asp-page="/Account/Logout" asp-antiforgery="true">
 						<button class="btn btn-sm btn-outline-secondary" type="submit">
-							<i class="bi bi-box-arrow-right me-1"></i> Logout
+							<i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
 						</button>
 					</form>
 				</div>
 			</div>
 		</nav>
 
-		<div class="container-fluid py-3" style="width: 98%">
+		<div class="container-fluid py-3">
 			@RenderBody()
 		</div>
 	</main>
@@ -110,6 +118,13 @@
 	<div id="appLoading" class="app-loading" aria-hidden="true" role="status">
 		<div class="loader"></div>
 	</div>
+
+	<div class="modal fade" id="pwdModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content" id="pwdModalContent"></div>
+		</div>
+	</div>
+
 </body>
 </html>
 <script>

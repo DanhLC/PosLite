@@ -32,7 +32,7 @@ body {
 .sidebar {
     position: fixed;
     left: 0;
-    width: 10%;
+    width: 18vh;
     height: 100dvh;
     background: var(--sb-bg);
     color: var(--sb-fg);
