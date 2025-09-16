@@ -67,6 +67,9 @@ public class BulkLinkModalModel : PageModel
 
         await _db.SaveChangesAsync();
 
+        TempData["Toast.Type"] = "success";
+        TempData["Toast.Text"] = "Đã liên kết khách hàng thành công.";
+
         return Content(@"<script>
             window.appToast?.ok('Đã liên kết khách hàng thành công.');
             const el = document.getElementById('bulkModal');

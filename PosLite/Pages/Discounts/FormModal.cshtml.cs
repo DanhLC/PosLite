@@ -49,7 +49,6 @@ public class FormModalModel : PageModel
     {
         if (!ModelState.IsValid) { await OnGet(); return Page(); }
 
-        // Quy tắc: (CustomerId, ProductId) là duy nhất → nếu đã có thì cập nhật % và ngày
         var exist = await _db.CustomerProductDiscounts
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x => x.CustomerId == M.CustomerId && x.ProductId == M.ProductId);
@@ -76,9 +75,9 @@ public class FormModalModel : PageModel
         else
         {
             var row = await _db.CustomerProductDiscounts.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == Id.Value);
+
             if (row == null) return NotFound();
 
-            // Nếu đổi sang KH/SP trùng bản khác → merge (theo quy tắc duy nhất)
             if (exist != null && exist.Id != row.Id)
             {
                 exist.Percent = M.Percent;
@@ -96,6 +95,9 @@ public class FormModalModel : PageModel
 
         await _db.SaveChangesAsync();
 
+        TempData["Toast.Type"] = "success";
+        TempData["Toast.Text"] = "Lưu liên kết thành công.";
+
         if (Request.Headers.ContainsKey("HX-Request"))
         {
             return Content(@"<script>
@@ -106,8 +108,6 @@ public class FormModalModel : PageModel
             </script>", "text/html");
         }
 
-        TempData["Toast.Type"] = "success";
-        TempData["Toast.Text"] = "Lưu liên kết thành công.";
         return RedirectToPage("./Index");
     }
 }

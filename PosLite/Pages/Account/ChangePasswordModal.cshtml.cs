@@ -54,6 +54,9 @@ public class ChangePasswordModalModel : PageModel
 
         await _signInManager.RefreshSignInAsync(user);
 
+        TempData["Toast.Type"] = "success";
+        TempData["Toast.Text"] = "Đã cập nhật mật khẩu thành công.";
+
         Response.Headers["HX-Trigger"] = "pwd-changed";
         return new EmptyResult();
     }

@@ -55,12 +55,12 @@
             <label class="form-label">Giá</label><label style="color:red">*</label>
             <input id="PriceDisplay"
                    class="form-control text-end"
-                   inputmode="decimal" autocomplete="off"
+                   inputmode="numeric" autocomplete="off"
                    value="@(Model.M?.Price > 0
-                        ? string.Format(vi, "{0:N3}", Model.M.Price).TrimEnd('0').TrimEnd(',')
-                        : "0")" />
+                ? string.Format(vi, "{0:N0}", Model.M.Price)
+                : "0")" />
 
-            <input asp-for="M.Price" type="hidden" />
+            <input asp-for="M.Price" type="hidden" id="M_Price" />
             <span class="text-danger" asp-validation-for="M.Price"></span>
         </div>
 
@@ -80,47 +80,42 @@
 </div>
 
 <script>
-    (function () {
-      const display = document.getElementById('PriceDisplay');
-      const hidden  = document.getElementById('M_Price');
+    (() => {
+      const txt = document.getElementById('PriceDisplay');
+      const hid = document.getElementById('M_Price');
 
-      function formatVi(s) {
-        if (!s) return "";
-        s = s.replace(/\./g, '').replace(/[^\d,]/g, '');
-        const parts = s.split(',');
-        let intPart = parts[0] || '';
-        let frac    = parts[1] || '';
-        frac = frac.substring(0, 3);
-        intPart = intPart.replace(/^0+(?=\d)/, '');
-        if (intPart === '') intPart = '0';
-        intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        return frac.length ? `${intPart},${frac}` : intPart;
+      if (!txt || !hid) return;
+
+      const nf = new Intl.NumberFormat('vi-VN');
+
+      const onlyDigits = s => (s || '').replace(/[^\d]/g, '');
+
+      function formatLive() {
+        const beforeLen   = txt.value.length;
+        const caretBefore = txt.selectionStart ?? beforeLen;
+
+        const digits = onlyDigits(txt.value);
+        hid.value = digits === '' ? '0' : String(parseInt(digits, 10));
+
+        txt.value = digits ? nf.format(parseInt(digits, 10)) : '';
+
+        const afterLen = txt.value.length;
+        const delta    = afterLen - beforeLen;
+        try {
+          const newPos = Math.max(0, (caretBefore + delta));
+          txt.setSelectionRange(newPos, newPos);
+        } catch (_) { }
       }
 
-      function syncHiddenFromDisplay() {
-        const formatted = formatVi(display.value);
-        display.value = formatted;
-        hidden.value = formatted.replace(/\./g, '');
-      }
-
-      display.addEventListener('input', () => {
-        const v = display.value.replace(/[^\d,]/g, '');
-        hidden.value = v;
+      txt.addEventListener('focus', () => {
+        txt.value = onlyDigits(txt.value);
+        txt.select();
       });
-      display.addEventListener('blur', syncHiddenFromDisplay);
-      syncHiddenFromDisplay();
-    })();
 
-    (function () {
-      const form = document.querySelector('form[hx-post]');
-      form?.addEventListener('submit', function (e) {
-        const cat = document.getElementById('M_CategoryId');
-        if (!cat.value) {
-          e.preventDefault(); e.stopPropagation();
-          window.appToast?.err('Vui lòng chọn danh mục.');
-          cat.focus();
-        }
-      });
+      txt.addEventListener('input', formatLive);
+      txt.addEventListener('blur',  formatLive);
+
+      formatLive();
     })();
 </script>
 

@@ -106,6 +106,9 @@ public class FormModalModel : PageModel
                 IsActive = M.IsActive
             };
             _db.Products.Add(p);
+
+            TempData["Toast.Type"] = "success";
+            TempData["Toast.Text"] = "Lưu sản phẩm thành công.";
         }
         else
         {
@@ -119,6 +122,9 @@ public class FormModalModel : PageModel
             p.CategoryId = M.CategoryId;
             p.Price = M.Price;
             p.IsActive = M.IsActive;
+
+            TempData["Toast.Type"] = "success";
+            TempData["Toast.Text"] = "Đã cập nhật sản phẩm thành công.";
         }
 
         await _db.SaveChangesAsync();
@@ -134,8 +140,6 @@ public class FormModalModel : PageModel
             return Content(html, "text/html");
         }
 
-        TempData["Toast.Type"] = "success";
-        TempData["Toast.Text"] = "Lưu sản phẩm thành công.";
         return RedirectToPage("./Index");
     }
 }

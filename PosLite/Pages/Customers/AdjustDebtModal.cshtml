@@ -36,13 +36,11 @@
 
         <div class="mb-3">
             <label class="form-label">Số tiền (VND)</label>
-            <!-- Ô hiển thị cho người dùng -->
             <input id="AmountDisplay"
                    class="form-control text-end"
                    inputmode="numeric" autocomplete="off"
                    value="@initAmount" />
 
-            <!-- Giá trị thật gửi về server -->
             <input asp-for="M.Amount" type="hidden" id="M_Amount" />
             <span class="text-danger" asp-validation-for="M.Amount"></span>
         </div>

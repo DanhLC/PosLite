@@ -82,6 +82,9 @@ public class FormModalModel : PageModel
                 IsActive = M.IsActive
             };
             _db.Customers.Add(c);
+
+            TempData["Toast.Type"] = "success";
+            TempData["Toast.Text"] = "Lưu khách hàng thành công.";
         }
         else
         {
@@ -93,6 +96,9 @@ public class FormModalModel : PageModel
             c.Phone = string.IsNullOrWhiteSpace(M.Phone) ? null : M.Phone!.Trim();
             c.Address = string.IsNullOrWhiteSpace(M.Address) ? null : M.Address!.Trim();
             c.IsActive = M.IsActive;
+
+            TempData["Toast.Type"] = "success";
+            TempData["Toast.Text"] = "Đã cập nhật khách hàng thành công.";
         }
 
         await _db.SaveChangesAsync();
@@ -108,8 +114,6 @@ public class FormModalModel : PageModel
             return Content(html, "text/html");
         }
 
-        TempData["Toast.Type"] = "success";
-        TempData["Toast.Text"] = "Lưu khách hàng thành công.";
         return RedirectToPage("./Index");
     }
 }

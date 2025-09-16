@@ -40,7 +40,6 @@ public class AdjustDebtModalModel : PageModel
             .Where(l => l.CustomerId == Id)
             .SumAsync(l => l.Debit - l.Credit);
 
-        // Prefill ghi chú nếu trống
         if (string.IsNullOrWhiteSpace(M.Note))
         {
             var vi = CultureInfo.GetCultureInfo("vi-VN");
@@ -64,18 +63,18 @@ public class AdjustDebtModalModel : PageModel
             return Page();
 
         int delta;
+
         if (M.Mode == "set")
         {
-            delta = M.Amount - CurrentBalance; // đặt số dư bằng M.Amount
+            delta = M.Amount - CurrentBalance; 
         }
         else
         {
-            delta = (M.Direction == "increase" ? 1 : -1) * M.Amount; // cộng/trừ
+            delta = (M.Direction == "increase" ? 1 : -1) * M.Amount; 
         }
 
         if (delta == 0)
         {
-            // Không thay đổi gì → đóng modal
             return Content(
                 "<script>bootstrap.Modal.getInstance(document.getElementById('adjustModal'))?.hide();</script>",
                 "text/html");
@@ -95,6 +94,9 @@ public class AdjustDebtModalModel : PageModel
         });
 
         await _db.SaveChangesAsync();
+
+        TempData["Toast.Type"] = "success";
+        TempData["Toast.Text"] = "ĐãĐã điều chỉnh công nợ.";
 
         return Content(@"<script>
             window.appToast?.ok('Đã điều chỉnh công nợ.');
