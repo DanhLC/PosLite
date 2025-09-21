@@ -1,0 +1,63 @@
+﻿@page "/cau-hinh-shop"
+@model PosLite.Pages.Shop.SettingsModel
+@{
+    ViewData["Title"] = "Cấu hình shop";
+}
+
+<h2 class="mb-4">Cấu hình shop</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label class="form-label">Tên công ty/shop</label>
+        <input asp-for="Settings.ShopName" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Địa chỉ</label>
+        <input asp-for="Settings.Address" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Điện thoại</label>
+        <input asp-for="Settings.Phone" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Hotline</label>
+        <input asp-for="Settings.Hotline" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Slogan</label>
+        <input asp-for="Settings.Slogan" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Ghi chú trên hóa đơn</label>
+        <textarea asp-for="Settings.Note" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Logo hiện tại</label><br />
+        @if (!string.IsNullOrWhiteSpace(Model.Settings.LogoUrl))
+        {
+            <img src="@Model.Settings.LogoUrl" alt="Logo" style="height: 80px;" />
+        }
+        else
+        {
+            <span class="text-muted">Chưa có logo</span>
+        }
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Upload logo mới</label>
+        <input asp-for="LogoFile" type="file" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+</form>

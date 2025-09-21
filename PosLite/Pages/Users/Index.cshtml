@@ -68,7 +68,6 @@
                     <th>Email</th>
                     <th>Tên đăng nhập</th>
                     <th>Điện thoại</th>
-                    <th>Xác thực email</th>
                     <th>Khoá</th>
                     <th class="text-end">Thao tác</th>
                 </tr>
@@ -86,7 +85,6 @@
                             <td class="fw-medium">@r.Email</td>
                             <td>@r.UserName</td>
                             <td>@r.Phone</td>
-                            <td>@(r.EmailConfirmed ? "Đã xác thực" : "Chưa")</td>
                             <td>@(r.LockoutEnd.HasValue && r.LockoutEnd > DateTimeOffset.UtcNow ? "Đang khoá" : "—")</td>
                             <td class="text-end">
                                 @if (!r.IsBase)

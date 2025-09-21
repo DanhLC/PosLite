@@ -82,21 +82,24 @@
 			</div>
 		</li>
 
-		<li class="text-uppercase small text-muted mt-3 mb-1 px-2">Hệ thống</li>
+		@if (User.IsInRole("Admin"))
+		{
+			<li class="text-uppercase small text-muted mt-3 mb-1 px-2">Hệ thống</li>
 
-		<li class="nav-item">
-			<a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Users") ? " active" : "")"
-			   asp-page="/Users/Index">
-				<i class="bi bi-person-gear"></i><span>Người dùng</span>
-			</a>
-		</li>
+			<li class="nav-item">
+				<a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Users") ? " active" : "")"
+				   asp-page="/Users/Index">
+					<i class="bi bi-person-gear"></i><span>Người dùng</span>
+				</a>
+			</li>
 
-		<li class="nav-item">
-			<a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Settings") ? " active" : "")"
-			   asp-page="/Settings/Index">
-				<i class="bi bi-gear"></i><span>Cấu hình shop</span>
-			</a>
-		</li>
+			<li class="nav-item">
+				<a class="nav-link d-flex align-items-center gap-2@(PageStartsWith("/Settings") ? " active" : "")"
+				   asp-page="/Settings/SettingsModel">
+					<i class="bi bi-gear"></i><span>Cấu hình shop</span>
+				</a>
+			</li>
+		}
 
 		<hr />
 		<li class="text-uppercase small text-muted mt-3 mb-1 px-2">Phiên bản<span class="badge ms-1 text-black badge-sm" style="background-color:#f0bc74!important">1.0.0</span></li>

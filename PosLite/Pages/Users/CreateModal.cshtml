@@ -17,13 +17,13 @@
         <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
 
         <div class="mb-3">
-            <label asp-for="Input.Email" class="form-label">Email</label>
+            <label asp-for="Input.Email" class="form-label">Email</label><label style="color:red">*</label>
             <input asp-for="Input.Email" class="form-control" />
             <span asp-validation-for="Input.Email" class="text-danger small"></span>
         </div>
 
         <div class="mb-3">
-            <label asp-for="Input.UserName" class="form-label">Tên đăng nhập</label>
+            <label asp-for="Input.UserName" class="form-label">Tên đăng nhập</label><label style="color:red">*</label>
             <input asp-for="Input.UserName" class="form-control" />
             <span asp-validation-for="Input.UserName" class="text-danger small"></span>
         </div>

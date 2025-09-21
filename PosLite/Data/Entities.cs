@@ -108,8 +108,20 @@ public class CustomerLedger
 public class ShopSetting
 {
     public string Key { get; set; } = default!;
-    public string? Value { get; set; }
+    public string? JsonValue { get; set; }
 }
+
+public class ShopSettings
+{
+    public string ShopName { get; set; } = "";
+    public string Address { get; set; } = "";
+    public string Phone { get; set; } = "";
+    public string Hotline { get; set; } = "";
+    public string Slogan { get; set; } = "";
+    public string Note { get; set; } = "";
+    public string LogoUrl { get; set; } = "";
+}
+
 
 /// <summary>
 /// Application database context, inheriting from IdentityDbContext to include identity management.
