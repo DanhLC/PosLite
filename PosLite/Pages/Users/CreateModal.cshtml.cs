@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace PosLite.Pages.Users;
 
+/// <summary>
+/// Page model for creating a new user via a modal dialog.
+/// </summary>
 public class CreateModalModel : PageModel
 {
     private readonly UserManager<AppUser> _um;
@@ -21,6 +24,9 @@ public class CreateModalModel : PageModel
         [Compare(nameof(Password))] public string ConfirmPassword { get; set; } = "";
     }
 
+    /// <summary>
+    /// Handle GET requests.
+    /// </summary>
     public void OnGet() { }
 
     public async Task<IActionResult> OnPostAsync()
