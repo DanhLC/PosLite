@@ -1,0 +1,96 @@
+﻿@page
+@model PosLite.Pages.Users.CreateModalModel
+@{
+    Layout = null;
+}
+
+<div class="modal-header">
+    <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Tạo người dùng</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <form hx-post="/Users/CreateModal"
+          hx-target="#usrModalContent"
+          hx-swap="innerHTML" asp-antiforgery="true">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+        <div class="mb-3">
+            <label asp-for="Input.Email" class="form-label">Email</label>
+            <input asp-for="Input.Email" class="form-control" />
+            <span asp-validation-for="Input.Email" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Input.UserName" class="form-label">Tên đăng nhập</label>
+            <input asp-for="Input.UserName" class="form-control" />
+            <span asp-validation-for="Input.UserName" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Input.PhoneNumber" class="form-label">Điện thoại</label>
+            <input asp-for="Input.PhoneNumber" class="form-control" />
+            <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mật khẩu</label>
+            <div class="input-group">
+                <input asp-for="Input.Password" type="password" class="form-control" />
+                <button type="button" class="btn btn-outline-secondary toggle-eye">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nhập lại mật khẩu</label>
+            <div class="input-group">
+                <input asp-for="Input.ConfirmPassword" type="password" class="form-control" />
+                <button type="button" class="btn btn-outline-secondary toggle-eye">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+            <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button class="btn btn-primary" type="submit">Lưu</button>
+        </div>
+    </form>
+</div>
+
+<script>
+  (function () {
+    const modal = document.getElementById('usrModal');
+    if (!modal) return;
+
+    if (modal.dataset.eyeBound === '1') return;
+    modal.dataset.eyeBound = '1';
+
+    modal.addEventListener('click', function (e) {
+      const btn = e.target.closest('.toggle-eye');
+      if (!btn) return;
+      if (!modal.contains(btn)) return;
+
+      const inp  = btn.previousElementSibling; 
+      if (!inp) return;
+      const icon = btn.querySelector('i');
+
+      const show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password';
+      if (icon) {
+        icon.classList.toggle('bi-eye', !show);
+        icon.classList.toggle('bi-eye-slash', show);
+      }
+    });
+  })();
+</script>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <script>window.appToast?.err('Vui lòng kiểm tra lại thông tin.');</script>
+}

@@ -1,0 +1,149 @@
+﻿@page "/nguoi-dung"
+@model PosLite.Pages.Users.IndexModel
+@{
+    ViewData["Title"] = "Người dùng";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h1 class="h4 mb-1">Người dùng</h1>
+        <div class="text-secondary small">Tạo tài khoản & đặt lại mật khẩu</div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary"
+                data-bs-toggle="modal" data-bs-target="#usrModal"
+                hx-get="/Users/CreateModal"
+                hx-target="#usrModalContent" hx-swap="innerHTML">
+            <i class="bi bi-person-plus me-1"></i> Tạo người dùng
+        </button>
+    </div>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <input type="hidden" name="pageIndex" value="1" />
+    <div class="col-lg-4">
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input name="q" value="@Model.q" class="form-control" placeholder="Email/Tên/Điện thoại..." />
+        </div>
+    </div>
+    <div class="col-lg-2">
+        <select name="pageSize" class="form-select">
+            @foreach (var s in new[] { 10, 20, 30, 50 })
+            {
+                <option value="@s" selected="@(Model.pageSize==s ? "selected" : null)">@s / trang</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-outline-secondary">Lọc</button>
+    </div>
+</form>
+
+
+<div class="modal fade" id="usrModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" id="usrModalContent"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" id="userModalContent"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="resetPwdModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" id="resetPwdModalContent"></div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Email</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Điện thoại</th>
+                    <th>Xác thực email</th>
+                    <th>Khoá</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-center text-secondary py-4">Không có dữ liệu.</td></tr>
+                }
+                else
+                {
+                    foreach (var r in Model.Items)
+                    {
+                        <tr>
+                            <td class="fw-medium">@r.Email</td>
+                            <td>@r.UserName</td>
+                            <td>@r.Phone</td>
+                            <td>@(r.EmailConfirmed ? "Đã xác thực" : "Chưa")</td>
+                            <td>@(r.LockoutEnd.HasValue && r.LockoutEnd > DateTimeOffset.UtcNow ? "Đang khoá" : "—")</td>
+                            <td class="text-end">
+                                @if (!r.IsBase)
+                                {
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            data-bs-toggle="modal" data-bs-target="#userModal"
+                                            hx-get="/Users/EditModal?id=@r.Id"
+                                            hx-target="#userModalContent" hx-swap="innerHTML">
+                                        <i class="bi bi-pencil-square"></i> Sửa
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning"
+                                            data-bs-toggle="modal" data-bs-target="#userModal"
+                                            hx-get="/Users/ResetPasswordModal?id=@r.Id"
+                                            hx-target="#userModalContent" hx-swap="innerHTML">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Đặt lại mật khẩu
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="text-secondary small">—</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer">
+            <nav>
+                <ul class="pagination mb-0">
+                    <li class="page-item @(Model.pageIndex<=1?"disabled":"")">
+                        <a class="page-link" asp-page="./Index"
+                           asp-route-q="@Model.q"
+                           asp-route-pageIndex="@(Model.pageIndex-1)"
+                           asp-route-pageSize="@Model.pageSize">Previous</a>
+                    </li>
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i==Model.pageIndex?"active":"")">
+                            <a class="page-link" asp-page="./Index"
+                               asp-route-q="@Model.q"
+                               asp-route-pageIndex="@i"
+                               asp-route-pageSize="@Model.pageSize">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.pageIndex>=Model.TotalPages?"disabled":"")">
+                        <a class="page-link" asp-page="./Index"
+                           asp-route-q="@Model.q"
+                           asp-route-pageIndex="@(Model.pageIndex+1)"
+                           asp-route-pageSize="@Model.pageSize">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>

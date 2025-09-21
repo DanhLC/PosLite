@@ -12,6 +12,7 @@ public static class Seed
                 await roleMgr.CreateAsync(new IdentityRole(r));
 
         var admin = await userMgr.FindByEmailAsync("admin@local.com");
+
         if (admin == null)
         {
             admin = new AppUser
@@ -23,6 +24,5 @@ public static class Seed
             await userMgr.CreateAsync(admin, "admin@local.com");
             await userMgr.AddToRoleAsync(admin, "Admin");
         }
-
     }
 }
