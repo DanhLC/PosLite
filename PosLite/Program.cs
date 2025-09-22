@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using PosLite.Common;
@@ -62,6 +63,20 @@ app.UseStatusCodePagesWithReExecute("/404");
 app.UseAuthorization();
 app.MapRazorPages().RequireAuthorization();
 
+app.Use(async (context, next) =>
+{
+    var remoteIp = context.Connection.RemoteIpAddress;
+
+    if (!remoteIp.ToString().StartsWith("192.168."))
+    {
+        context.Response.StatusCode = 403;
+        await context.Response.WriteAsync("Forbidden");
+        return;
+    }
+
+    await next.Invoke();
+});
+
 // Tạo DB + bật WAL + seed Admin
 using (var scope = app.Services.CreateScope())
 {
@@ -89,6 +104,3 @@ var locOptions = new RequestLocalizationOptions
     SupportedCultures = new[] { vi },
     SupportedUICultures = new[] { vi }
 };
-
-app.UseRequestLocalization(locOptions);
-app.Run();
