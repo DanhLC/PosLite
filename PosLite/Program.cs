@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using PosLite.Common;
@@ -7,7 +6,7 @@ using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DbContext + SQLite
+// ================= DB Context (SQLite) =================
 var dataDir = Path.Combine(Directory.GetCurrentDirectory(), "data");
 if (!Directory.Exists(dataDir))
     Directory.CreateDirectory(dataDir);
@@ -16,7 +15,7 @@ var dbPath = Path.Combine(dataDir, "pos.db");
 builder.Services.AddDbContext<AppDb>(o =>
     o.UseSqlite($"Data Source={dbPath}"));
 
-// Identity
+// ================= Identity =================
 builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
 {
     opt.SignIn.RequireConfirmedAccount = false;
@@ -29,55 +28,65 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
 .AddEntityFrameworkStores<AppDb>()
 .AddDefaultTokenProviders();
 
-// Cookie (đi đúng trang login custom)
+// ================= Cookie =================
 builder.Services.ConfigureApplicationCookie(o =>
 {
     o.LoginPath = "/Account/Login";
     o.AccessDeniedPath = "/Account/Login";
     o.SlidingExpiration = true;
-    o.ExpireTimeSpan = TimeSpan.FromDays(30); 
+    o.ExpireTimeSpan = TimeSpan.FromDays(30);
 });
 
-// Razor Pages + mở ẩn danh cho trang login
+// ================= Razor Pages =================
 builder.Services.AddRazorPages().AddRazorPagesOptions(opt =>
 {
     opt.Conventions.AllowAnonymousToPage("/Account/Login");
     opt.Conventions.AllowAnonymousToPage("/Status/404");
     opt.Conventions.AllowAnonymousToPage("/Status/500");
 });
+
+// ================= Dependency Injection =================
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    serverOptions.ListenAnyIP(5000);
-});
-
 var app = builder.Build();
 
+// ================= Middleware =================
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Status/500");
+    app.UseStatusCodePagesWithReExecute("/Status/404");
+}
+
 app.UseStaticFiles();
+
 app.UseRouting();
+
 app.UseAuthentication();
-app.UseExceptionHandler("/500");
-app.UseStatusCodePagesWithReExecute("/404");
 app.UseAuthorization();
+
+// ================= Chặn IP ngoài LAN =================
+if (app.Environment.IsProduction())
+{
+    app.Use(async (context, next) =>
+    {
+        var remoteIp = context.Connection.RemoteIpAddress;
+
+        if (remoteIp != null && !remoteIp.ToString().StartsWith("192.168."))
+        {
+            context.Response.StatusCode = 403;
+            await context.Response.WriteAsync("Forbidden");
+            return;
+        }
+
+        await next();
+    });
+}
+
+// ================= Razor Pages =================
 app.MapRazorPages().RequireAuthorization();
 
-app.Use(async (context, next) =>
-{
-    var remoteIp = context.Connection.RemoteIpAddress;
-
-    if (!remoteIp.ToString().StartsWith("192.168."))
-    {
-        context.Response.StatusCode = 403;
-        await context.Response.WriteAsync("Forbidden");
-        return;
-    }
-
-    await next.Invoke();
-});
-
-// Tạo DB + bật WAL + seed Admin
+// ================= DB Migration + Seed =================
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDb>();
@@ -86,9 +95,9 @@ using (var scope = app.Services.CreateScope())
     await Seed.CreateRolesAndAdmin(scope.ServiceProvider);
 
     var needFix = await db.Categories
-       .IgnoreQueryFilters()
-       .Where(c => string.IsNullOrEmpty(c.NameSearch))
-       .ToListAsync();
+        .IgnoreQueryFilters()
+        .Where(c => string.IsNullOrEmpty(c.NameSearch))
+        .ToListAsync();
 
     foreach (var c in needFix)
         c.NameSearch = TextSearch.Normalize(c.Name);
@@ -97,6 +106,7 @@ using (var scope = app.Services.CreateScope())
         await db.SaveChangesAsync();
 }
 
+// ================= Localization =================
 var vi = new CultureInfo("vi-VN");
 var locOptions = new RequestLocalizationOptions
 {
@@ -104,3 +114,6 @@ var locOptions = new RequestLocalizationOptions
     SupportedCultures = new[] { vi },
     SupportedUICultures = new[] { vi }
 };
+app.UseRequestLocalization(locOptions);
+
+app.Run();
