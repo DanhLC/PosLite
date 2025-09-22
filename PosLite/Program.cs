@@ -31,8 +31,8 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
 // ================= Cookie =================
 builder.Services.ConfigureApplicationCookie(o =>
 {
-    o.LoginPath = "/Account/Login";
-    o.AccessDeniedPath = "/Account/Login";
+    o.LoginPath = "/dang-nhap";
+    o.AccessDeniedPath = "/dang-nhap";
     o.SlidingExpiration = true;
     o.ExpireTimeSpan = TimeSpan.FromDays(30);
 });
@@ -43,6 +43,7 @@ builder.Services.AddRazorPages().AddRazorPagesOptions(opt =>
     opt.Conventions.AllowAnonymousToPage("/Account/Login");
     opt.Conventions.AllowAnonymousToPage("/Status/404");
     opt.Conventions.AllowAnonymousToPage("/Status/500");
+    opt.Conventions.AllowAnonymousToPage("/Status/403");
 });
 
 // ================= Dependency Injection =================
@@ -70,18 +71,25 @@ if (app.Environment.IsProduction())
 {
     app.Use(async (context, next) =>
     {
-        var remoteIp = context.Connection.RemoteIpAddress;
+        var path = context.Request.Path.Value;
 
+        if (path != null && path.StartsWith("/403"))
+        {
+            await next();
+            return;
+        }
+
+        var remoteIp = context.Connection.RemoteIpAddress;
         if (remoteIp != null && !remoteIp.ToString().StartsWith("192.168."))
         {
-            context.Response.StatusCode = 403;
-            await context.Response.WriteAsync("Forbidden");
+            context.Response.Redirect("/403");
             return;
         }
 
         await next();
     });
 }
+
 
 // ================= Razor Pages =================
 app.MapRazorPages().RequireAuthorization();
