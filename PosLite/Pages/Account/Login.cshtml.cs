@@ -23,6 +23,10 @@ public class LoginModel : PageModel
 
     public void OnGet() { }
 
+    /// <summary>
+    /// Handle login form submission.
+    /// </summary>
+    /// <returns></returns>
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid) return Page();

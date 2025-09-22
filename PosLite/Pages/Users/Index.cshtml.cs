@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +15,7 @@ public class IndexModel : PageModel
     [BindProperty(SupportsGet = true)] public string? q { get; set; }
     [BindProperty(SupportsGet = true)] public int pageIndex { get; set; } = 1;
     [BindProperty(SupportsGet = true)] public int pageSize { get; set; } = 10;
+    [BindProperty(SupportsGet = true)] public string status { get; set; } = "all";
 
     public int TotalItems { get; set; }
     public int TotalPages => (int)Math.Ceiling((double)TotalItems / Math.Max(1, pageSize));
@@ -33,6 +34,10 @@ public class IndexModel : PageModel
         public bool IsBase { get; set; }
     }
 
+    /// <summary>
+    /// Load users with optional search and pagination.
+    /// </summary>
+    /// <returns></returns>
     public async Task OnGet()
     {
         var users = _userManager.Users.AsQueryable();
@@ -44,6 +49,17 @@ public class IndexModel : PageModel
                 (u.Email != null && u.Email.ToLower().Contains(term)) ||
                 (u.UserName != null && u.UserName.ToLower().Contains(term)) ||
                 (u.PhoneNumber != null && u.PhoneNumber.Contains(term)));
+        }
+
+        var now = DateTimeOffset.UtcNow;
+
+        if (status == "active")
+        {
+            users = users.Where(u => u.LockoutEnd == null);
+        }
+        else if (status == "inactive")
+        {
+            users = users.Where(u => u.LockoutEnd != null);
         }
 
         TotalItems = await users.CountAsync();
@@ -67,5 +83,58 @@ public class IndexModel : PageModel
                 IsBase = u.Email != null &&
                      u.Email.Equals("admin@local.com", StringComparison.OrdinalIgnoreCase)
             }).ToListAsync();
+    }
+
+    /// <summary>
+    /// Bulk deactivate users by setting their LockoutEnd to a far future date.
+    /// </summary>
+    /// <param name="ids"></param>
+    /// <returns></returns>
+    public async Task<IActionResult> OnPostBulkDeactivateAsync([FromForm] string[] ids)
+    {
+        if (ids == null || ids.Length == 0)
+        {
+            TempData["Error"] = "Không có người dùng nào được chọn.";
+            return RedirectToPage();
+        }
+
+        foreach (var id in ids)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null || user.Email == "admin@local.com") continue;
+
+            user.LockoutEnd = DateTimeOffset.UtcNow.AddYears(100);
+            await _userManager.UpdateAsync(user);
+        }
+
+        TempData["Success"] = "Đã khóa người dùng thành công.";
+        return RedirectToPage();
+    }
+
+    /// <summary>
+    /// Bulk activate users by clearing their LockoutEnd.
+    /// </summary>
+    /// <param name="ids"></param>
+    /// <returns></returns>
+    public async Task<IActionResult> OnPostBulkActivateAsync([FromForm] string[] ids)
+    {
+        if (ids == null || ids.Length == 0)
+        {
+            TempData["Error"] = "Không có người dùng nào được chọn.";
+            return RedirectToPage();
+        }
+
+        foreach (var id in ids)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null || user.Email == "admin@local.com") continue;
+
+            user.LockoutEnd = null;
+            await _userManager.UpdateAsync(user);
+        }
+
+        TempData["Success"] = "Đã mở khóa người dùng thành công.";
+        return RedirectToPage();
     }
 }

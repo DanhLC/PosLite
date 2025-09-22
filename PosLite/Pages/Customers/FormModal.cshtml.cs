@@ -28,6 +28,10 @@ public class FormModalModel : PageModel
 
     private static string GenCode() => "KH" + Guid.NewGuid().ToString("N")[..6].ToUpperInvariant();
 
+    /// <summary>
+    /// Load customer data if Id is provided, otherwise prepare for new customer.
+    /// </summary>
+    /// <returns></returns>
     public async Task OnGet()
     {
         if (Id.HasValue)
@@ -53,6 +57,10 @@ public class FormModalModel : PageModel
         }
     }
 
+    /// <summary>
+    /// Handle form submission for creating or updating a customer.
+    /// </summary>
+    /// <returns></returns>
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)

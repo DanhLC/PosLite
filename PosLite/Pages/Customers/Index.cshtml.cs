@@ -35,6 +35,10 @@ public class IndexModel : PageModel
         public int Balance { get; set; }
     }
 
+    /// <summary>
+    /// Load customers with optional search, status filter, and pagination.
+    /// </summary>
+    /// <returns></returns>
     public async Task OnGet()
     {
         var query = _db.Customers.IgnoreQueryFilters().AsQueryable();
@@ -87,6 +91,11 @@ public class IndexModel : PageModel
         Items = page;
     }
 
+    /// <summary>
+    /// Activate a customer by setting IsActive to true.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<IActionResult> OnPostActivateAsync(Guid id)
     {
         var c = await _db.Customers.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.CustomerId == id);
@@ -109,6 +118,11 @@ public class IndexModel : PageModel
         return RedirectToPage("./Index", new { q, status, pageIndex, pageSize });
     }
 
+    /// <summary>
+    /// Bulk delete customers by IDs, ensuring no related sales invoices exist.
+    /// </summary>
+    /// <param name="ids"></param>
+    /// <returns></returns>
     public async Task<IActionResult> OnPostBulkDeleteAsync([FromForm] List<Guid> ids)
     {
         if (ids is null || ids.Count == 0)
@@ -154,7 +168,6 @@ public class IndexModel : PageModel
             TempData["Toast.Text"] = $"Đã xóa {okIds.Count} khách hàng.";
         }
 
-        // Tính lại trang hiện tại sau khi xóa (tránh rơi vào trang trống)
         var after = _db.Customers.IgnoreQueryFilters().AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(q))

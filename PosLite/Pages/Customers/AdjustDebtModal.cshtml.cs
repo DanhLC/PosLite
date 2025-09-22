@@ -30,6 +30,10 @@ public class AdjustDebtModalModel : PageModel
         public string? Note { get; set; }
     }
 
+    /// <summary>
+    /// Load customer and current balance.
+    /// </summary>
+    /// <returns></returns>
     public async Task<IActionResult> OnGet()
     {
         var c = await _db.Customers.FirstOrDefaultAsync(x => x.CustomerId == Id);
@@ -49,6 +53,10 @@ public class AdjustDebtModalModel : PageModel
         return Page();
     }
 
+    /// <summary>
+    /// Adjust customer debt based on input mode and amount.
+    /// </summary>
+    /// <returns></returns>
     public async Task<IActionResult> OnPostAsync()
     {
         var c = await _db.Customers.FirstOrDefaultAsync(x => x.CustomerId == Id);

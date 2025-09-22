@@ -37,6 +37,10 @@ public class ChangePasswordModalModel : PageModel
 
     public void OnGet() { }
 
+    /// <summary>
+    /// Handle password change request.
+    /// </summary>
+    /// <returns></returns>
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid) return Page();
