@@ -7,8 +7,13 @@ using System.Globalization;
 var builder = WebApplication.CreateBuilder(args);
 
 // DbContext + SQLite
+var dataDir = Path.Combine(Directory.GetCurrentDirectory(), "data");
+if (!Directory.Exists(dataDir))
+    Directory.CreateDirectory(dataDir);
+
+var dbPath = Path.Combine(dataDir, "pos.db");
 builder.Services.AddDbContext<AppDb>(o =>
-    o.UseSqlite(builder.Configuration.GetConnectionString("AppDb")));
+    o.UseSqlite($"Data Source={dbPath}"));
 
 // Identity
 builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
@@ -41,6 +46,11 @@ builder.Services.AddRazorPages().AddRazorPagesOptions(opt =>
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(5000);
+});
 
 var app = builder.Build();
 
